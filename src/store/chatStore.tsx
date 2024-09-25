@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from "react";
 
-import { IMessageContent, ITransactionData } from "@/types";
+import { IMessageContent } from "@/types";
 
 // Define the types for the context
 interface ChatContextType {
@@ -14,8 +14,8 @@ interface ChatContextType {
   setIsWaitingForResponse: React.Dispatch<React.SetStateAction<boolean>>;
   showRightPanel: boolean;
   setShowRightPanel: React.Dispatch<React.SetStateAction<boolean>>;
-  transactionData: ITransactionData | null;
-  setTransactionData: React.Dispatch<React.SetStateAction<ITransactionData | null>>;
+  job_id: string;
+  setJobId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // Create the context with a default value

@@ -5,4 +5,5 @@ export interface IMessageContent {
   timestamp: string;
   source_text: string[];
   question: string;
+  job_id: string;
 }
