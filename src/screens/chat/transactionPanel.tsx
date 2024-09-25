@@ -1,11 +1,12 @@
-import { useLazyQuery } from "@apollo/client";
-import { formatDistance, formatISO } from "date-fns";
-import { CopyIcon, Loader } from "lucide-react";
+import { useQuery } from "@apollo/client";
+import { formatDate, formatDistance } from "date-fns";
+import { CopyIcon } from "lucide-react";
 import React, { useEffect } from "react";
 
 import { GET_BLOCKCHAIN_DATA_BY_HASH } from "@/apollo/schemas/getdatabyhash";
+import TxHashLoader from "@/components/Loaders/hashLoader";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
-import { ITransactionData } from "@/types";
+import { useGetBlockchainTxData } from "@/hooks/useGetBlockchainTxData";
 
 // Dummy data for the transaction (can also be passed as props)
 // const transactionInitial: ITransactionData = {
@@ -29,57 +30,60 @@ import { ITransactionData } from "@/types";
 // };
 
 type Props = {
-  chainType: string;
-  transactionHash: string;
+  job_id: string;
 };
 const TransactionPanel: React.FC<Props> = (props) => {
-  const { chainType, transactionHash } = props;
-  const [getData, { loading }] = useLazyQuery(GET_BLOCKCHAIN_DATA_BY_HASH);
-  const [transactionData, setTransactionData] = React.useState<ITransactionData | null>(null);
+  const { job_id } = props;
+  const [latestConfirmations, setLatestConfirmations] = React.useState<string | null>(null);
+  const { loading, fetch, data: transactionData } = useGetBlockchainTxData(job_id);
+  const [transactionId, setTransactionId] = React.useState<string>("");
+  const { refetch } = useQuery(GET_BLOCKCHAIN_DATA_BY_HASH, { variables: { chainType: "Avalanche", transactionHash: transactionId } });
 
   useEffect(() => {
-    if (chainType && transactionHash) {
-      getData({
-        variables: {
-          chainType,
-          transactionHash
-        }
-      })
-        .then((res) => {
-          setTransactionData(res.data?.GetHashTransaction?.data || null);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
+    if (job_id) {
+      setLatestConfirmations(null);
+      fetch();
     }
-  }, [chainType, transactionHash]);
+  }, [job_id]);
+  useEffect(() => {
+    if (transactionData) {
+      setTransactionId(transactionData.transactionId.S);
+    }
+  }, [transactionData]);
 
+  useEffect(() => {
+    if (transactionId) {
+      refetch().then((res) => {
+        setLatestConfirmations(res.data?.GetHashTransaction?.data?.confirmations || null);
+      });
+    }
+  }, [transactionId]);
   return (
     <div className="px-6 pt-0 ">
-      {loading && <Loader />}
+      {loading && <TxHashLoader />}
       {transactionData && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
             {/* Each detail in a KPI card */}
-            <Card value={transactionData?.blockNumber} title="Block Number" showCopyIcon={true} />
-            <Card value={transactionData?.chainId} title="Chain Id" showCopyIcon={true} />
-            <Card value={transactionData?.status} title="Status" />
+            <Card value={transactionData?.blockNumber?.S} title="Block Number" showCopyIcon={true} />
+            <Card value={transactionData?.chainId?.S} title="Chain Id" showCopyIcon={true} />
+            <Card value={transactionData?.status?.S} title="Status" />
           </div>
           <div className="pt-5">
-            <InlineDetails value={transactionData?.blockHash} title="Content Hash" showCopyIcon={true} />
-            <InlineDetails value={transactionData?.blockHash} title="Block Hash" showCopyIcon={true} />
-            <InlineDetails value={transactionData?.transactionId} title="Transaction Hash" showCopyIcon={true} />
-            <InlineDetails value={transactionData?.metaData} title="Metadata Hash" showCopyIcon={true} />
-            <InlineDetails value={transactionData?.from} title="From" showCopyIcon={true} />
-            <InlineDetails value={transactionData?.to} title="To" showCopyIcon={true} />
-            <InlineDetails value={transactionData?.confirmations} title="Confirmation" />
-            <InlineDetails value={transactionData?.message} title="Message" />
-            <InlineDetails value={parseFloat(transactionData?.gas) + " AVAX"} title="Gas" />
+            <InlineDetails value={transactionData?.hash?.S} title="Content Hash" showCopyIcon={true} />
+            <InlineDetails value={transactionData?.blockHash?.S} title="Block Hash" showCopyIcon={true} />
+            <InlineDetails value={transactionData?.transactionId?.S} title="Transaction Hash" showCopyIcon={true} />
+            {/* <InlineDetails value={transactionData?.metaData?.S} title="Metadata Hash" showCopyIcon={true} /> */}
+            <InlineDetails value={transactionData?.from?.S} title="From" showCopyIcon={true} />
+            <InlineDetails value={transactionData?.to?.S} title="To" showCopyIcon={true} />
+            <InlineDetails value={latestConfirmations ? latestConfirmations : transactionData?.confirmations?.S} title="Confirmation" />
+            <InlineDetails value={transactionData?.message?.S} title="Message" />
+            <InlineDetails value={parseFloat(transactionData?.gas?.S) + " AVAX"} title="Gas used" />
             <InlineDetails
               value={
-                formatDistance(transactionData?.timestamp, new Date(), { addSuffix: true, includeSeconds: true }) +
+                formatDistance(transactionData?.timestamp?.S, new Date(), { addSuffix: true, includeSeconds: true }) +
                 " (" +
-                formatISO(transactionData?.timestamp) +
+                formatDate(transactionData?.timestamp?.S, "MMM dd yyyy, mm:hh a") +
                 ")"
               }
               title="Timestamp"
@@ -90,7 +94,7 @@ const TransactionPanel: React.FC<Props> = (props) => {
           <hr className="my-6" />
           <div className="flex justify-center pt-5">
             <a
-              href={`https://testnet.snowtrace.io/tx/${transactionData.transactionId}`}
+              href={`https://testnet.snowtrace.io/tx/${transactionData.transactionId.S}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex justify-between items-center w-fit text-lg font-semibold bg-white text-red-500 border border-red-500 px-4 py-2 rounded-lg shadow hover:opacity-90 transition-colors"

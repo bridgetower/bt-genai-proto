@@ -9,8 +9,8 @@ import { ChatInputContainer } from "./chatInputContainer";
 import TransactionPanel from "./transactionPanel";
 
 export const ChatPage: React.FC = () => {
-  const { sessionIds, setSessionIds, setLatestSessionId, chatContent, showRightPanel, setShowRightPanel } = useChat();
-
+  const { sessionIds, setSessionIds, setLatestSessionId, chatContent, showRightPanel, setShowRightPanel, job_id } = useChat();
+  // const { fetch, data } = useGetBlockchainTxData("BWEcqmrhGp");
   useEffect(() => {
     const newSessionid = "initial-" + Math.random().toString(36).substring(2, 11);
     setSessionIds([...sessionIds, newSessionid]);
@@ -35,7 +35,7 @@ export const ChatPage: React.FC = () => {
         </div>
       </div>
       <RightDrawer onClose={togglePanel} isOpen={showRightPanel}>
-        <TransactionPanel chainType="Avalanche" transactionHash="0x1640972dc53ddfe901f1edf9ce28797c2196e2e90add92e467d7bbf80c1626cb" />
+        <TransactionPanel job_id={job_id} />
       </RightDrawer>
     </div>
   );

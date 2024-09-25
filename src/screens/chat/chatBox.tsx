@@ -7,6 +7,7 @@ import MessageLoader from "@/components/Loaders/msgLoader";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useHandleMessageSend } from "@/hooks/useHandleMessageSend";
 import { useChat } from "@/store/chatStore";
+import { IMessageContent } from "@/types";
 
 import { DefaultSuggestions } from "./defaultSeggestion";
 
@@ -23,7 +24,7 @@ const ChatBox: React.FC = () => {
   const handleSend = useHandleMessageSend(message, setMessage);
   // const [tooltipData, setTooltipData] = useState({ displayText: "", content: "" });
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
-  const { chatContent, isWaitingForResponse, setShowRightPanel, showRightPanel } = useChat();
+  const { chatContent, isWaitingForResponse, setShowRightPanel, showRightPanel, setJobId } = useChat();
   const [copyToClipboard] = useCopyToClipboard();
   useLayoutEffect(() => {
     if (lastMessageRef.current) {
@@ -75,6 +76,10 @@ const ChatBox: React.FC = () => {
   // const onClosePopover = () => {
   //   setTooltipData({ displayText: "", content: "" });
   // };
+  const toggleRightPanel = (msgMeta: IMessageContent) => {
+    setShowRightPanel(!showRightPanel);
+    setJobId(msgMeta.job_id);
+  };
   return (
     <>
       {/* <Popover open={!!tooltipData.content} description={tooltipData.content} onClose={onClosePopover} /> */}
@@ -114,13 +119,13 @@ const ChatBox: React.FC = () => {
                         <PanelRightClose
                           size={20}
                           className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
-                          onClick={() => setShowRightPanel(true)}
+                          onClick={() => toggleRightPanel(msg)}
                         />
                       ) : (
                         <PanelRightOpen
                           size={20}
                           className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
-                          onClick={() => setShowRightPanel(true)}
+                          onClick={() => toggleRightPanel(msg)}
                         />
                       )}
                     </div>
