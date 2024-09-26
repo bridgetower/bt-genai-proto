@@ -36,7 +36,7 @@ export const DefaultSuggestions: React.FC = () => {
       {defaultSuggestion.map((item, index) => (
         <div
           key={index}
-          className="text-primary  border border-primary rounded-xl bg-card shadow-md w-full p-5 cursor-pointer min-w-[100px]"
+          className="text-primary text-base border border-primary rounded-xl bg-card shadow-md w-full p-5 cursor-pointer min-w-[100px]"
           onClick={() => handleSelect(item.text)}
         >
           {item.text}
