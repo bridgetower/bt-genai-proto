@@ -1,7 +1,7 @@
 import { ArrowLeft, X } from "lucide-react";
 import React, { ReactNode } from "react";
 
-import { Button } from "./button";
+import { Button } from "../ui/button";
 
 interface DrawerProps {
   title: string; // Title of the side panel
