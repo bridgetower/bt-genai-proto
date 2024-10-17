@@ -90,17 +90,17 @@ const LoginPage: React.FC = () => {
                 <div className="space-y-2">
                   <div className="space-y-4">
                     <div className={`form-control ${errors.email && touched.email ? "error" : ""}`}>
-                      <Label htmlFor="email">Email*</Label>
+                      <Label htmlFor="email">Username*</Label>
                       <Field
                         as={Input}
                         id="email"
-                        type="email"
+                        type="text"
                         placeholder="Email"
                         name="email"
                         validate={(value: string | undefined) => {
                           let error;
                           if (!value) {
-                            error = "Email is required";
+                            error = "Username is required";
                           }
                           return error;
                         }}

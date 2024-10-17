@@ -13,6 +13,7 @@ import { useAuth } from "../../providers/CoginitoAuthProvider";
 import { ValidateConfirmPasswords, validateEmailId } from "../../utils/validators";
 
 interface IFormValues {
+  username: string;
   email: string;
   firstname: string;
   lastname: string;
@@ -23,16 +24,17 @@ interface IFormValues {
 const Signup: React.FC = (props) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPass, setShowConfirmPassword] = useState<boolean>(false);
-  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const { createAccount, showVerifySignupModal, setShowVerifySignupModal, isLoading } = useAuth();
 
   const submit = (values: IFormValues) => {
-    setUsername(values.email);
+    setEmail(values.email);
     const attributeList = [
+      new CognitoUserAttribute({ Name: "email", Value: values.email }),
       new CognitoUserAttribute({ Name: "given_name", Value: values.firstname }),
       new CognitoUserAttribute({ Name: "family_name", Value: values.lastname })
     ];
-    createAccount(values.email, values.newPassword, attributeList);
+    createAccount(values.username, values.newPassword, attributeList);
   };
 
   const onCloseConfirmationPopup = () => {
@@ -42,7 +44,7 @@ const Signup: React.FC = (props) => {
   return (
     <>
       <Loader show={isLoading} />
-      <SignupConfirmSignup isOpen={showVerifySignupModal} onClose={onCloseConfirmationPopup} username={username} />
+      <SignupConfirmSignup isOpen={showVerifySignupModal} onClose={onCloseConfirmationPopup} username={email} />
       {/* <SignInBanner> */}
       <div className="flex justify-center items-center w-full min-h-screen py-4 sm:px-8 bg-white sm:bg-transparent">
         <div className="w-full max-w-lg py-4 px-4 rounded-3xl sm:px-8 sm:bg-white sm:shadow-md">
@@ -60,6 +62,7 @@ const Signup: React.FC = (props) => {
           </div>
           <Formik
             initialValues={{
+              username: "",
               email: "",
               firstname: "",
               lastname: "",
@@ -74,6 +77,30 @@ const Signup: React.FC = (props) => {
               <form onSubmit={handleSubmit} autoComplete="off">
                 <div className="space-y-6">
                   <div className="space-y-5">
+                    <div className={`flex flex-col space-y-2 ${touched.username && errors.username ? "text-red-500" : ""}`}>
+                      <label htmlFor="username" className="font-medium">
+                        Username
+                      </label>
+                      <Field
+                        autoComplete="off"
+                        as={Input}
+                        width="100%"
+                        id="username"
+                        type="text"
+                        placeholder="Unique username"
+                        name="username"
+                        required
+                        validate={(value: string) => {
+                          let error;
+                          if (!value) {
+                            error = "Username is mandatory!";
+                          }
+                          return error;
+                        }}
+                      />
+                      {touched.username && errors.username && <div className="text-red-500 text-sm">{errors.username}</div>}
+                    </div>
+
                     <div className={`flex flex-col space-y-2 ${touched.email && errors.email ? "text-red-500" : ""}`}>
                       <label htmlFor="email" className="font-medium">
                         Email
@@ -136,6 +163,7 @@ const Signup: React.FC = (props) => {
                           {...props}
                         />
                         <button
+                          tabIndex={-1}
                           type="button"
                           className="absolute inset-y-0 right-0 pr-3 flex items-center"
                           onClick={() => setShowPassword(!showPassword)}
@@ -164,6 +192,7 @@ const Signup: React.FC = (props) => {
                           {...props}
                         />
                         <button
+                          tabIndex={-1}
                           type="button"
                           className="absolute inset-y-0 right-0 pr-3 flex items-center"
                           onClick={() => setShowConfirmPassword(!showConfirmPass)}

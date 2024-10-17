@@ -394,13 +394,13 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
   // Function for creating a new account
   const createAccount = (username: string, password: string, newAttributeList: { Name: string; Value: string }[]) => {
     setIsLoading(true);
-    const attributeList = [];
-    const dataEmail = {
-      Name: "email",
-      Value: username
-    };
-    const attributeEmail = new CognitoUserAttribute(dataEmail);
-    attributeList.push(attributeEmail);
+    const attributeList: any[] = [];
+    // const dataEmail = {
+    //   Name: "email",
+    //   Value: username
+    // };
+    // const attributeEmail = new CognitoUserAttribute(dataEmail);
+    // attributeList.push(attributeEmail);
     newAttributeList.forEach((att) => {
       const data = {
         Name: att.Name,
