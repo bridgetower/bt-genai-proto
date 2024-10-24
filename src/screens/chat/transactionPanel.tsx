@@ -59,7 +59,7 @@ const TransactionPanel: React.FC<Props> = (props) => {
     }
   }, [transactionId]);
   return (
-    <div className="px-6 pt-0 ">
+    <div className="px-6 pt-4 ">
       {loading && <TxHashLoader />}
       {transactionData && (
         <>
@@ -114,10 +114,10 @@ const Card = ({ title, value, showCopyIcon = false }: { title: string; value: st
   return (
     <div className="p-3 bg-primary-foreground rounded-lg shadow-lg border border-primary">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-extrabold text-primary capitalize">{title}</h3>
+        <h3 className="text-sm font-bold text-primary capitalize">{title}</h3>
       </div>
       <p
-        className={`mt-2 ${title === "Status" ? (value === "SUCCESS" ? "text-green-600" : "text-yellow-500") : "text-primary"} flex justify-between text-xs font-medium capitalize`}
+        className={`mt-2 ${title === "Status" ? (value === "SUCCESS" ? "text-green-600" : "text-yellow-500") : "text-primary"} flex justify-between items-center text-sm font-medium capitalize`}
       >
         {value}
         {showCopyIcon && (
@@ -138,13 +138,15 @@ const InlineDetails = ({ title, value, showCopyIcon = false }: { title: string; 
       <div className="flex items-center">
         <h3 className="text-sm font-bold text-primary capitalize whitespace-nowrap">{title}:</h3>
 
-        <p className="ml-2 text-primary text-xs max-w-[300px] truncate col-span-3 tr">{value}</p>
+        <p className="ml-2 text-primary text-sm  truncate col-span-3 tr">{value}</p>
         {showCopyIcon && (
-          <CopyIcon
-            size={16}
-            onClick={() => copyToClipboard(value.toString())}
-            className="text-primary hover:text-secondary-foreground/70 cursor-pointer ml-2"
-          />
+          <div className="min-w-5">
+            <CopyIcon
+              size={16}
+              onClick={() => copyToClipboard(value.toString())}
+              className="text-primary hover:text-secondary-foreground/70 cursor-pointer ml-2"
+            />
+          </div>
         )}
       </div>
     </div>

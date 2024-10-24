@@ -34,7 +34,7 @@ export const ChatPage: React.FC = () => {
           <ChatInputContainer />
         </div>
       </div>
-      <RightDrawer onClose={togglePanel} isOpen={showRightPanel}>
+      <RightDrawer onClose={togglePanel} isOpen={showRightPanel} title="Proof of origin">
         <TransactionPanel job_id={job_id} />
       </RightDrawer>
     </div>

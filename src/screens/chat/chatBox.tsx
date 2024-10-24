@@ -2,6 +2,7 @@ import { formatRelative } from "date-fns";
 import { CopyIcon, PanelRightClose, PanelRightOpen, RefreshCcwIcon } from "lucide-react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
+import { TooltipComponent } from "@/components/common/tooltip";
 // import { Popover } from "@/components/common/Popover";
 import MessageLoader from "@/components/Loaders/msgLoader";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
@@ -94,7 +95,7 @@ const ChatBox: React.FC = () => {
                     className={` px-4 py-2 rounded-xl shadow-md  ${!msg.isBot ? "bg-primary text-primary-foreground" : "bg-primary-foreground text-primary"}`}
                   >
                     <div
-                      className="text-start text-sm font-normal pt-4 leading-6"
+                      className="text-start text-base font-normal pt-4"
                       dangerouslySetInnerHTML={{ __html: replaceSourcesWithLinks(msg.message, msg.source_text || []) }}
                     ></div>
                     <div className="flex justify-end items-baseline pt-4">
@@ -105,29 +106,44 @@ const ChatBox: React.FC = () => {
                   </div>
                   {msg.isBot && (
                     <div className="pt-2 flex items-center pl-4">
-                      <CopyIcon
-                        size={20}
-                        className="text-primary cursor-copy hover:text-secondary-foreground/70 mx-2"
-                        onClick={() => copyToClipboard(msg.message)}
+                      <TooltipComponent
+                        content="Copy"
+                        displayText={
+                          <CopyIcon
+                            size={20}
+                            className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
+                            onClick={() => copyToClipboard(msg.message)}
+                          />
+                        }
                       />
-                      <RefreshCcwIcon
-                        size={20}
-                        className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
-                        onClick={() => regenerate(msg.question)}
+                      <TooltipComponent
+                        content="Regenerate"
+                        displayText={
+                          <RefreshCcwIcon
+                            size={20}
+                            className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
+                            onClick={() => regenerate(msg.question)}
+                          />
+                        }
                       />
-                      {showRightPanel ? (
-                        <PanelRightClose
-                          size={20}
-                          className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
-                          onClick={() => toggleRightPanel(msg)}
-                        />
-                      ) : (
-                        <PanelRightOpen
-                          size={20}
-                          className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
-                          onClick={() => toggleRightPanel(msg)}
-                        />
-                      )}
+                      <TooltipComponent
+                        content="Proof of origin"
+                        displayText={
+                          showRightPanel ? (
+                            <PanelRightClose
+                              size={20}
+                              className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
+                              onClick={() => toggleRightPanel(msg)}
+                            />
+                          ) : (
+                            <PanelRightOpen
+                              size={20}
+                              className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
+                              onClick={() => toggleRightPanel(msg)}
+                            />
+                          )
+                        }
+                      />
                     </div>
                   )}
                 </div>

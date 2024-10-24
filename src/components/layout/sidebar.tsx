@@ -1,4 +1,4 @@
-import { MessageCircleMore, Settings } from "lucide-react";
+import { MessageCircleMore } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -31,7 +31,7 @@ export const Sidebar: React.FC = () => {
             </div>
           </Link>
         </li>
-        <li className="group px-6">
+        {/* <li className="group px-6">
           <Link
             to={""}
             className={`block text-start text-base px-6 py-3 mt-2 transform transition-all duration-300 ease-in-out group-hover:bg-gray-800 rounded-full group-hover:pl-10 group-hover:text-yellow-400 ${getAtiveItem() === "Settings" ? "bg-gray-800 rounded-full pl-10 text-yellow-400" : ""}`}
@@ -40,7 +40,7 @@ export const Sidebar: React.FC = () => {
               <Settings className="mr-1" size={16} /> Settings
             </div>
           </Link>
-        </li>
+        </li> */}
       </ul>
     </div>
   );
