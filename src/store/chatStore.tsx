@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from "react";
 
-import { IMessageContent } from "@/types";
+import { IMessageContent, SourceReference } from "@/types";
 
 // Define the types for the context
 interface ChatContextType {
@@ -12,10 +12,15 @@ interface ChatContextType {
   setLatestSessionId: React.Dispatch<React.SetStateAction<string>>;
   isWaitingForResponse: boolean;
   setIsWaitingForResponse: React.Dispatch<React.SetStateAction<boolean>>;
-  showRightPanel: boolean;
-  setShowRightPanel: React.Dispatch<React.SetStateAction<boolean>>;
+  showRightPanel: "origin" | "sources" | "";
+  setShowRightPanel: React.Dispatch<React.SetStateAction<"origin" | "sources" | "">>;
   job_id: string;
   setJobId: React.Dispatch<React.SetStateAction<string>>;
+
+  sources: SourceReference[];
+  setSources: React.Dispatch<React.SetStateAction<SourceReference[]>>;
+  activeSourceIndex: number;
+  setActiveSourceIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
 // Create the context with a default value

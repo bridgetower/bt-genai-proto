@@ -47,15 +47,19 @@ const TransactionPanel: React.FC<Props> = (props) => {
   }, [job_id]);
   useEffect(() => {
     if (transactionData) {
-      setTransactionId(transactionData.transactionId.S);
+      setTransactionId(transactionData.txHash.S);
     }
   }, [transactionData]);
 
   useEffect(() => {
     if (transactionId) {
-      refetch().then((res) => {
-        setLatestConfirmations(res.data?.GetHashTransaction?.data?.confirmations || null);
-      });
+      refetch()
+        .then((res) => {
+          setLatestConfirmations(res.data?.GetHashTransaction?.data?.confirmations || null);
+        })
+        .catch((e) => {
+          console.log("Error fetching transaction data", e);
+        });
     }
   }, [transactionId]);
   return (
@@ -72,13 +76,13 @@ const TransactionPanel: React.FC<Props> = (props) => {
           <div className="pt-5">
             <InlineDetails value={transactionData?.hash?.S} title="Content Hash" showCopyIcon={true} />
             <InlineDetails value={transactionData?.blockHash?.S} title="Block Hash" showCopyIcon={true} />
-            <InlineDetails value={transactionData?.transactionId?.S} title="Transaction Hash" showCopyIcon={true} />
+            <InlineDetails value={transactionData?.txHash?.S} title="Transaction Hash" showCopyIcon={true} />
             {/* <InlineDetails value={transactionData?.metaData?.S} title="Metadata Hash" showCopyIcon={true} /> */}
             <InlineDetails value={transactionData?.from?.S} title="From" showCopyIcon={true} />
             <InlineDetails value={transactionData?.to?.S} title="To" showCopyIcon={true} />
             <InlineDetails value={latestConfirmations ? latestConfirmations : transactionData?.confirmations?.S} title="Confirmation" />
             <InlineDetails value={transactionData?.message?.S} title="Message" />
-            <InlineDetails value={parseFloat(transactionData?.gas?.S) + " AVAX"} title="Gas used" />
+            <InlineDetails value={parseFloat(transactionData?.gasFee?.S) + " AVAX"} title="Gas used" />
             <InlineDetails
               value={
                 formatDistance(transactionData?.timestamp?.S, new Date(), { addSuffix: true, includeSeconds: true }) +
@@ -94,7 +98,7 @@ const TransactionPanel: React.FC<Props> = (props) => {
           <hr className="my-6" />
           <div className="flex justify-center pt-5">
             <a
-              href={`https://testnet.snowtrace.io/tx/${transactionData.transactionId.S}`}
+              href={`https://testnet.snowtrace.io/tx/${transactionData.txHash.S}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex justify-between items-center w-fit text-lg font-semibold bg-white text-red-500 border border-red-500 px-4 py-2 rounded-lg shadow hover:opacity-90 transition-colors"
