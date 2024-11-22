@@ -6,12 +6,12 @@ import { Button } from "./button";
 interface DrawerProps {
   title: string; // Title of the side panel
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (type: "origin" | "sources" | "") => void;
   children: ReactNode; // Content inside the side panel
   width?: string; // Allows setting custom width
 }
 
-const RightDrawer: React.FC<DrawerProps> = ({ isOpen, onClose, width = "w-1/3", children, title }) => {
+const RightDrawer: React.FC<DrawerProps> = ({ isOpen, onClose, width = "w-2/5", children, title }) => {
   return (
     <div className="relative">
       {/* Side Panel */}
@@ -22,13 +22,13 @@ const RightDrawer: React.FC<DrawerProps> = ({ isOpen, onClose, width = "w-1/3", 
       >
         <div className="px-4 pt-4 flex justify-between items-center">
           <div className="w-6 mr-2">
-            <Button onClick={() => onClose()} className="rounded-full h-8 w-8" variant={"ghost"} size={"icon"}>
+            <Button onClick={() => onClose("")} className="rounded-full h-8 w-8" variant={"ghost"} size={"icon"}>
               <ArrowLeft size={20} className="text-primary" />
             </Button>
           </div>
           <h1 className="text-xl text-primary font-bold w-full">{title}</h1>
           <div className="w-6">
-            <Button onClick={() => onClose()} className="rounded-full h-8 w-8" variant={"ghost"} size={"icon"}>
+            <Button onClick={() => onClose("")} className="rounded-full h-8 w-8" variant={"ghost"} size={"icon"}>
               <X size={20} className="text-primary" />
             </Button>
           </div>
@@ -39,7 +39,7 @@ const RightDrawer: React.FC<DrawerProps> = ({ isOpen, onClose, width = "w-1/3", 
       </div>
 
       {/* Overlay (optional) */}
-      {isOpen && <div onClick={onClose} className="fixed inset-[0px] z-40 bg-black/40"></div>}
+      {isOpen && <div onClick={() => onClose("")} className="fixed inset-[0px] z-40 bg-black/40"></div>}
     </div>
   );
 };

@@ -7,7 +7,7 @@ export const GET_BLOCKCHAIN_DATA_BY_HASH = gql`
       error
       data {
         confirmations
-        transactionId
+        txHash
       }
     }
   }

@@ -12,7 +12,7 @@ export const useGetBlockchainTxData = (job_id: string) => {
       setLoading(true);
       axios
         .post(
-          `https://xqqaejrec4dujiwv3ipxrgfqk40hlcjw.lambda-url.us-east-1.on.aws/`,
+          `https://yhxv55v5tknylmdtk3dafjymxy0zrsup.lambda-url.us-east-1.on.aws/`,
           {
             job_id
           },
@@ -24,8 +24,8 @@ export const useGetBlockchainTxData = (job_id: string) => {
         )
         .then((res) => {
           if (res.status === 200) {
-            console.log(res.data);
-            setData(res.data);
+            console.log(res.data.response);
+            setData(JSON.parse(res.data.response || "{}"));
           }
         })
         .catch((e) => {

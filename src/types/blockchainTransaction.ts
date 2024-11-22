@@ -4,7 +4,7 @@ export interface ITransactionData {
   chainId: { S: string };
   from: { S: string };
   to: { S: string };
-  transactionId: { S: string };
+  txHash: { S: string };
   hash: { S: string };
   blockHash: { S: string };
   status: { S: string };
@@ -12,7 +12,7 @@ export interface ITransactionData {
   timestamp: { S: string };
   metaData: { S: string };
   confirmations: { S: string };
-  gas: { S: string };
+  gasFee: { S: string };
   value?: { S: string };
   gasPrice?: { S: string };
   gasLimit?: { S: string };

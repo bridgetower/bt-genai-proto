@@ -3,101 +3,128 @@ import { CopyIcon, PanelRightClose, PanelRightOpen, RefreshCcwIcon } from "lucid
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { TooltipComponent } from "@/components/common/tooltip";
-// import { Popover } from "@/components/common/Popover";
 import MessageLoader from "@/components/Loaders/msgLoader";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useHandleMessageSend } from "@/hooks/useHandleMessageSend";
 import { useChat } from "@/store/chatStore";
-import { IMessageContent } from "@/types";
+import { IMessageContent, SourceReference } from "@/types";
 
 import { DefaultSuggestions } from "./defaultSeggestion";
 
-// type Message = {
-//   id: number;
-//   text: string;
-//   sender: "me" | "other"; // 'me' for sent messages, 'other' for received messages
-//   timestamp: Date;
-// };
+interface Source {
+  link: string;
+  tooltip: string;
+}
+
+const SourceLink: React.FC<{
+  source: Source;
+  index: number;
+  onClickHandler: (sourceArray: SourceReference[], index: number) => void;
+  sourceReference: SourceReference[];
+}> = ({ source, index, onClickHandler, sourceReference }) => (
+  <a
+    href={source.link}
+    title={source.tooltip}
+    id={`source-${index}`}
+    className="text-[#1890FF] underline"
+    onClick={(e) => {
+      e.preventDefault();
+      onClickHandler(sourceReference, index);
+    }}
+  >
+    Source[{index}]
+  </a>
+);
+
+const MessageContent: React.FC<{
+  message: string;
+  sourceArray: string[];
+  sourceReference: SourceReference[];
+  onClickHandler: (sourceReference: SourceReference[], index: number) => void;
+}> = ({ message, sourceArray, sourceReference, onClickHandler }) => {
+  const sources = sourceArray.map((source) => ({
+    link: "javascript:void(0)",
+    tooltip: source
+  }));
+
+  const parts = message.split(/Source\[(\d+)\]/g);
+
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (i % 2 === 0) return part;
+        const index = parseInt(part, 10);
+        if (index < 0 || index >= sources.length) return `Source[${part}]`;
+        return (
+          <SourceLink
+            key={`source-${index}`}
+            sourceReference={sourceReference}
+            source={sources[index]}
+            index={index}
+            onClickHandler={onClickHandler}
+          />
+        );
+      })}
+    </>
+  );
+};
 
 const ChatBox: React.FC = () => {
-  // const allSourcesId: string[] = [];
   const [message, setMessage] = useState("");
   const handleSend = useHandleMessageSend(message, setMessage);
-  // const [tooltipData, setTooltipData] = useState({ displayText: "", content: "" });
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
-  const { chatContent, isWaitingForResponse, setShowRightPanel, showRightPanel, setJobId } = useChat();
+  const { chatContent, isWaitingForResponse, setShowRightPanel, showRightPanel, setJobId, setActiveSourceIndex, setSources } = useChat();
   const [copyToClipboard] = useCopyToClipboard();
+
   useLayoutEffect(() => {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatContent]);
 
-  console.log(chatContent);
-
   const regenerate = (msg: string) => {
     setMessage(msg);
   };
+
   useEffect(() => {
     if (message) {
       handleSend();
     }
   }, [message]);
 
-  const replaceSourcesWithLinks = (text: string, sourceArray: string[]) => {
-    const sources = sourceArray.map((source, index) => {
-      // const [link, tooltip] = source.split("|");
-      const link = "javascript:void(0)";
-      const tooltip = source;
-      return { link, tooltip };
-    });
-    // allSourcesId = sourceArray.map((_, i) => `Source[${i}]`);
-    return text.replace(/Source\[(\d+)\]/g, (match, sourceNumber) => {
-      const source = sources[sourceNumber];
-      if (source) {
-        return `
-        <a href="${source.link}" title="${source.tooltip}" id="Source[${sourceNumber}]" class="text-blue-600 underline">Source[${sourceNumber}]</a>`;
-      }
-      return match;
-    });
+  const handleSourceClick = (sourceArray: SourceReference[], index: number) => {
+    // console.log("Source clicked", sourceArray, index);
+    setActiveSourceIndex(index - 1);
+    setSources(sourceArray);
+    setShowRightPanel("sources");
   };
 
-  // useEffect(() => {
-  //   allSourcesId.forEach((sourceId) => {
-  //     const myDiv = document.getElementById(sourceId);
-  //     myDiv?.addEventListener("mouseover", function () {
-  //       setTooltipData({ displayText: sourceId, content:  chatContent});
-  //     });
-  //     myDiv?.addEventListener("mouseout", function () {
-  //       // setTooltipData({ displayText: sourceId, content: "" }); // Reset color on mouseout
-  //     });
-  //   });
-  // }, [allSourcesId]);
-
-  // const onClosePopover = () => {
-  //   setTooltipData({ displayText: "", content: "" });
-  // };
-  const toggleRightPanel = (msgMeta: IMessageContent) => {
-    setShowRightPanel(!showRightPanel);
+  const showProofOfOriginPanel = (msgMeta: IMessageContent) => {
+    setShowRightPanel("origin");
     setJobId(msgMeta.job_id);
   };
+
   return (
     <>
-      {/* <Popover open={!!tooltipData.content} description={tooltipData.content} onClose={onClosePopover} /> */}
       <div className="relative">
-        {/* <Tooltip id/> */}
-        <div className=" h-[calc(100vh-270px)] flex flex-col w-full p-4 bg-card rounded-lg overflow-auto custom-scrollbar">
+        <div className="h-[calc(100vh-270px)] flex flex-col w-full p-4 bg-card rounded-lg overflow-auto custom-scrollbar">
           <div className="flex-1 space-y-4">
             {chatContent.map((msg, index) => (
               <div key={index} className={`flex ${!msg.isBot ? "justify-end" : "justify-start"}`}>
                 <div className="max-w-[49%]">
                   <div
-                    className={` px-4 py-2 rounded-xl shadow-md  ${!msg.isBot ? "bg-primary text-primary-foreground" : "bg-primary-foreground text-primary"}`}
+                    className={`px-4 py-2 rounded-xl shadow-md ${
+                      !msg.isBot ? "bg-primary text-primary-foreground" : "bg-primary-foreground text-primary"
+                    }`}
                   >
-                    <div
-                      className="text-start text-base font-normal pt-4"
-                      dangerouslySetInnerHTML={{ __html: replaceSourcesWithLinks(msg.message, msg.source_text || []) }}
-                    ></div>
+                    <div className="text-start text-base font-normal pt-4">
+                      <MessageContent
+                        message={msg.message}
+                        sourceArray={msg.source_text || []}
+                        sourceReference={msg.sourceReference || []}
+                        onClickHandler={handleSourceClick}
+                      />
+                    </div>
                     <div className="flex justify-end items-baseline pt-4">
                       <span className={`text-xs ${!msg.isBot ? "text-primary-foreground" : "text-primary"}`}>
                         {formatRelative(new Date(msg.timestamp), new Date())}
@@ -133,13 +160,13 @@ const ChatBox: React.FC = () => {
                             <PanelRightClose
                               size={20}
                               className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
-                              onClick={() => toggleRightPanel(msg)}
+                              onClick={() => showProofOfOriginPanel(msg)}
                             />
                           ) : (
                             <PanelRightOpen
                               size={20}
                               className="text-primary cursor-pointer hover:text-secondary-foreground/70 mx-2"
-                              onClick={() => toggleRightPanel(msg)}
+                              onClick={() => showProofOfOriginPanel(msg)}
                             />
                           )
                         }
