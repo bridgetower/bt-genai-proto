@@ -1,9 +1,8 @@
-import { on } from "events";
-import { BookmarkPlusIcon, ClockAlert, CopyIcon, ForwardIcon, PlusCircle, Sun } from "lucide-react";
+import { BookmarkPlusIcon, ClockAlert, CopyIcon, ForwardIcon, PlusCircle } from "lucide-react";
 import React from "react";
 
-import { Button } from "@/components/common/button";
 import ThemeToggle from "@/components/common/themeToggler";
+import { Button } from "@/components/ui/button";
 import { useChat } from "@/store/chatStore";
 
 export const ChatHeader: React.FC = () => {
