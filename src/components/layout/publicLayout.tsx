@@ -1,15 +1,21 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
+import React, { useEffect } from "react";
+// import { Navbar } from "../../components/navbar/Navbar";
+import { Outlet, useNavigate } from "react-router-dom";
 
-import { Sidebar } from "./sidebar";
+import { useAuth } from "../../providers/CoginitoAuthProvider";
 
 export const PublicLayout: React.FC = () => {
+  const navigate = useNavigate();
+  const { usersession } = useAuth();
+  useEffect(() => {
+    if (usersession && usersession.isValid()) {
+      navigate("/");
+    }
+  }, [usersession]);
   return (
-    <div className="grid grid-cols-6">
-      <Sidebar />
-      <div className="col-span-5">
-        <Outlet />
-      </div>
+    <div>
+      <Outlet />
     </div>
   );
 };
+//#E7E6DE;
