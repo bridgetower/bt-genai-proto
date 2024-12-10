@@ -11,7 +11,7 @@ export const PublicLayout: React.FC = () => {
     if (usersession && usersession.isValid()) {
       navigate("/");
     }
-  }, [navigate]);
+  }, [usersession]);
   return (
     <div>
       <Outlet />

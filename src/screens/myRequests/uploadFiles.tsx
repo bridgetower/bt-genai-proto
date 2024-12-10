@@ -1,0 +1,185 @@
+import { useMutation } from "@apollo/client";
+import CryptoJS from "crypto-js";
+import { Loader2Icon, Plus } from "lucide-react";
+import React, { useState } from "react";
+import { useDropzone } from "react-dropzone";
+import toast, { Toaster } from "react-hot-toast";
+
+import { ADD_FILE_TO_PROJECT } from "@/apollo/schemas/projectSchemas";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import { IFileContent } from "@/types/ProjectData";
+
+export const AddFilesDialog: React.FC<{ onAfterUpload: () => void }> = (props) => {
+  const { onAfterUpload } = props;
+  const idToken = localStorage.getItem("idToken");
+  const [isOpen, setIsOpen] = useState(false);
+  const [base64Files, setBase64Files] = useState<IFileContent[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [addFileToProjectMutation] = useMutation(ADD_FILE_TO_PROJECT);
+
+  // Toggle modal visibility
+  const toggleModal = () => {
+    setIsOpen(!isOpen);
+    if (!isOpen) {
+      setBase64Files([]);
+    }
+  };
+
+  // Dropzone file handler
+  const onDrop = (acceptedFiles: File[]) => {
+    convertFilesToBase64(acceptedFiles);
+  };
+
+  const convertFilesToBase64 = (files: File[]) => {
+    const promises = files.map((file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () =>
+          resolve({
+            fileName: file.name,
+            fileContent: replaceBase64(reader.result as string),
+            contentType: file.type
+          });
+        reader.onerror = reject;
+      });
+    });
+
+    Promise.all(promises).then((base64Files) => {
+      setBase64Files(base64Files as IFileContent[]);
+    });
+  };
+
+  const replaceBase64 = (base64: string) => {
+    const newstr = base64.replace(/^data:[^;]+;base64,/, "");
+    return newstr;
+  };
+
+  const onUpload = async () => {
+    if (!uploading) {
+      setUploading(true);
+      const files = base64Files.map(async (file) => ({
+        fileName: file.fileName || "",
+        hash: await getHashedFile({
+          fileName: file.fileName,
+          fileContent: file.fileContent
+        }),
+        fileSize: formatFileSize(Number(file.fileSize) || 0),
+        contentType: file.contentType || "",
+        depth: 0,
+        refType: "DOCUMENT" as const,
+        websiteName: "",
+        websiteUrl: ""
+        // isLocal: file.isLocal,
+      }));
+      const hashedFilesData = await Promise.all(files);
+      addFileToProjectMutation({
+        variables: { projectId: process.env.REACT_APP_PROJECT_ID, files: hashedFilesData },
+        context: {
+          headers: {
+            identity: idToken
+          }
+        }
+      })
+        .then(async (res: any) => {
+          if (res.data?.AddFileToProject?.status === 200) {
+            setUploading(false);
+            onAfterUpload();
+            toast.success("Project updated successfully!");
+          } else {
+            setUploading(false);
+            toast.error(res.data?.AddFileToProject?.error);
+          }
+        })
+        .catch((error: any) => {
+          toast.error(error?.message || "Failed to add!");
+        })
+        .finally(() => {
+          setUploading(false);
+          // hideLoader();
+        });
+    }
+  };
+
+  const getHashedFile = async (data: any) => {
+    const metadata = JSON.stringify(data);
+    const hash = CryptoJS.SHA256(metadata).toString(CryptoJS.enc.Hex);
+    console.log("hash", metadata);
+
+    return hash;
+  };
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+
+    // Math.floor(Math.log(bytes) / Math.log(k)) finds the appropriate unit
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    // Convert to the appropriate unit and round to 2 decimal places
+    const finalSize = parseFloat((bytes / Math.pow(k, i)).toFixed(2));
+
+    return `${finalSize} ${sizes[i]}`;
+  };
+  // Dropzone settings
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+
+  return (
+    <div>
+      <Toaster />
+      <Button variant={"default"} className="" onClick={toggleModal}>
+        <Plus size={16} /> Add files
+      </Button>
+
+      {/* Modal */}
+      {isOpen && (
+        <Dialog open={isOpen} onOpenChange={toggleModal}>
+          <DialogContent className="">
+            <DialogHeader className="text-primary">Upload File</DialogHeader>
+
+            {/* Drag and Drop Area */}
+            <div
+              {...getRootProps()}
+              className="border-2 border-dashed border-muted-foreground bg-muted p-10 mt-5 text-center cursor-pointer"
+            >
+              <input {...getInputProps()} />
+              <p className="text-muted-foreground hover:opacity-80 ho ">Drag & Drop files here, or click to select files</p>
+            </div>
+
+            {/* Uploaded Files (Base64) */}
+            {base64Files.length > 0 && (
+              <div className="mt-5">
+                <h3 className="font-semibold text-sm text-start text-primary">Selected Files</h3>
+                <ul className="list-disc list-inside text-start text-primary">
+                  {base64Files.map((file, index) => (
+                    <li key={index} className="break-words text-xs font-thin">
+                      <strong>{file.fileName}:</strong>
+                      {/* {file.base64} */}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Close button */}
+            <div className="flex justify-center mt-10">
+              <Button
+                size={"sm"}
+                variant={"default"}
+                className={` flex justify-between items-center ${uploading && "cursor-not-allowed opacity-70"}`}
+                onClick={onUpload}
+              >
+                Upload
+                {uploading && <Loader2Icon size={18} className="text-black/90 animate-spin" />}
+              </Button>
+              <Button size={"sm"} variant={"secondary"} onClick={toggleModal} className=" ml-3">
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+};

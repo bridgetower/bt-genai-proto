@@ -7,6 +7,7 @@ import { ChatProvider } from "./providers/chatProvider";
 import { AuthProvider } from "./providers/CoginitoAuthProvider";
 import { ChatPage } from "./screens/chat";
 import LoginPage from "./screens/login/Login";
+import { MyFileRequestList } from "./screens/myRequests/MyFileRequestList";
 import PageNotFound from "./screens/page-not-found/pageNotFound";
 import Signup from "./screens/signup/SignUpForm";
 
@@ -29,6 +30,10 @@ const AppRouters: React.FC = () => {
                   </ChatProvider>
                 </>
               )
+            },
+            {
+              path: "my-file-requests",
+              element: <MyFileRequestList />
             }
           ]
         },

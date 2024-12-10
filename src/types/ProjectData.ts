@@ -14,6 +14,19 @@ export interface IProjectAttributes {
   hashRecorded: any[];
   hasAlert?: boolean;
 }
+export interface IFileContent {
+  refType: "DOCUMENT" | "WEBSITE";
+  fileName?: string;
+  contentType?: string;
+  isLocal?: boolean;
+  fileContent?: string;
+  id?: string;
+  fileSize?: string;
+  hash?: string;
+  depth?: number;
+  websiteName?: string;
+  websiteUrl?: string;
+}
 export enum ProjectType {
   "ON PREM" = "ON_PREM",
   HYBRID = "HYBRID",
@@ -52,7 +65,7 @@ export enum ProjectStatusEnum {
   CANCELLED = "CANCELLED",
   ACTIVE = "ACTIVE"
 }
-export type ActionStatus = "INITIATED" | "ACTIVE" | "ERROR" | "CANCELLED" | "COMPLETED";
+export type ActionStatus = "INITIATED" | "ACTIVE" | "ERROR" | "CANCELLED" | "COMPLETED" | "PENDING" | "APPROVED" | "REJECTED";
 
 export const statusColor: Record<ActionStatus, { bg: string; text: string }> = {
   INITIATED: {
@@ -60,8 +73,8 @@ export const statusColor: Record<ActionStatus, { bg: string; text: string }> = {
     text: "text-blue-600" // Tailwind text color
   },
   ACTIVE: {
-    bg: "bg-green-100",
-    text: "text-green-600"
+    bg: "bg-purple-100",
+    text: "text-purple-600"
   },
   ERROR: {
     bg: "bg-red-100",
@@ -72,8 +85,20 @@ export const statusColor: Record<ActionStatus, { bg: string; text: string }> = {
     text: "text-orange-600"
   },
   COMPLETED: {
-    bg: "bg-purple-100",
-    text: "text-purple-600"
+    bg: "bg-green-100",
+    text: "text-green-600"
+  },
+  PENDING: {
+    bg: "bg-orange-100",
+    text: "text-orange-600"
+  },
+  APPROVED: {
+    bg: "bg-green-100",
+    text: "text-green-600"
+  },
+  REJECTED: {
+    bg: "bg-red-100",
+    text: "text-red-600"
   }
 };
 

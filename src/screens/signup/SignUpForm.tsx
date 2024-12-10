@@ -30,11 +30,11 @@ const Signup: React.FC = (props) => {
   const submit = (values: IFormValues) => {
     setEmail(values.email);
     const attributeList = [
-      new CognitoUserAttribute({ Name: "email", Value: values.email }),
+      // new CognitoUserAttribute({ Name: "email", Value: values.email }),
       new CognitoUserAttribute({ Name: "given_name", Value: values.firstname }),
       new CognitoUserAttribute({ Name: "family_name", Value: values.lastname })
     ];
-    createAccount(values.username, values.newPassword, attributeList);
+    createAccount(values.email, values.newPassword, attributeList);
   };
 
   const onCloseConfirmationPopup = () => {
@@ -77,7 +77,7 @@ const Signup: React.FC = (props) => {
               <form onSubmit={handleSubmit} autoComplete="off">
                 <div className="space-y-6">
                   <div className="space-y-5">
-                    <div className={`flex flex-col space-y-2 ${touched.username && errors.username ? "text-red-500" : ""}`}>
+                    {/* <div className={`flex flex-col space-y-2 ${touched.username && errors.username ? "text-red-500" : ""}`}>
                       <label htmlFor="username" className="font-medium">
                         Username
                       </label>
@@ -99,7 +99,7 @@ const Signup: React.FC = (props) => {
                         }}
                       />
                       {touched.username && errors.username && <div className="text-red-500 text-sm">{errors.username}</div>}
-                    </div>
+                    </div> */}
 
                     <div className={`flex flex-col space-y-2 ${touched.email && errors.email ? "text-red-500" : ""}`}>
                       <label htmlFor="email" className="font-medium">

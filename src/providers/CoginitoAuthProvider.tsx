@@ -269,7 +269,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
           newUser.associateSoftwareToken({
             associateSecretCode: (secretCode) => {
               // navigate("setuptotp?secretCode=" + secretCode + "&username=" + username);
-              const otpauthUrl = `otpauth://totp/${encodeURIComponent("Meadowland")}:${encodeURIComponent(username ?? "")}?secret=${secretCode}&issuer=${encodeURIComponent("Meadowland.com")}`;
+              const otpauthUrl = `otpauth://totp/${encodeURIComponent("GeneAI")}:${encodeURIComponent(username ?? "")}?secret=${secretCode}&issuer=${encodeURIComponent("https://d2gyf9rwd0a9xd.cloudfront.net/")}`;
               setMfaAuthUrl(otpauthUrl);
               setShowMfaSettingModal(true);
               setIsLoading(false);
@@ -325,6 +325,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
           try {
             setUserSession(session);
             setIsAuthenticated(true);
+            setShowVerifyOtp(false);
             navigate("/");
           } catch (error) {
             console.error("Error storing user data:", error);
@@ -554,7 +555,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
         localStorage.clear();
         cognitoUser.signOut(() => {
           setIsAuthenticated(false);
-          removeSession();
+          setUserSession(null);
           navigate("/login");
         });
       }

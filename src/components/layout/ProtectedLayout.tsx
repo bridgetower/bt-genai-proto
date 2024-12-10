@@ -12,7 +12,7 @@ export const ProtectedLoyout: React.FC = () => {
     if (!usersession || !usersession.isValid()) {
       navigate("/login");
     }
-  }, [navigate]);
+  }, [usersession]);
   return (
     <div className="grid grid-cols-6">
       <Sidebar />

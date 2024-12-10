@@ -11,7 +11,7 @@ export const useHandleMessageSend = (message: string, setMessage: React.Dispatch
       setChatContent((pre: any) => [...pre, { message, question: message, isBot: false, timestamp: Date.now(), source_text: [] }]);
       axios
         .post(
-          `https://e6hsickmqidhdhkjpclhol4eke0vovmg.lambda-url.us-east-1.on.aws/`,
+          `https://qckclllnjvaozmbbseatqsy3ye.appsync-api.us-east-1.amazonaws.com/graphql`,
           {
             // sessionId: latestSessionId,
             message: message

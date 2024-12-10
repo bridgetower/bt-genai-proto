@@ -57,3 +57,57 @@ export const FETCH_PROJECT_BY_ID = gql`
     }
   }
 `;
+export const ADD_FILE_TO_PROJECT = gql`
+  mutation Mymutation($files: [ProjectFileInput]!, $projectId: String!) {
+    AddFileToProject(input: { files: $files, projectId: $projectId }) {
+      error
+      status
+      data {
+        refs {
+          createdat
+          datasourceid
+          depth
+          id
+          ingested
+          ingestionjobid
+          name
+          referencestage
+          reftype
+          size
+          status
+          url
+        }
+        urls {
+          key
+          url
+        }
+      }
+    }
+  }
+`;
+export const FETCH_MY_FILE_REQ_LIST = gql`
+  query MyQuery($pageNo: Int!, $limit: Int!) {
+    ListReferenceByCustomer(input: { limit: $limit, pageNo: $pageNo }) {
+      data {
+        refs {
+          createdat
+          datasourceid
+          depth
+          id
+          ingested
+          ingestionjobid
+          name
+          referencestage
+          reftype
+          size
+          status
+          url
+        }
+        total
+        totalPages
+      }
+      error
+      status
+    }
+  }
+`;
