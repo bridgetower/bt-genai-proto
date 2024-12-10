@@ -1,22 +1,28 @@
-import { useMutation } from "@apollo/client";
+import { FetchResult, useMutation } from "@apollo/client";
 import CryptoJS from "crypto-js";
-import { Loader2Icon, Plus } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import toast, { Toaster } from "react-hot-toast";
 
-import { ADD_FILE_TO_PROJECT } from "@/apollo/schemas/projectSchemas";
+import { ADD_FILE_TO_PROJECT, UPDATE_REF_STATUS } from "@/apollo/schemas/projectSchemas";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { IFileContent } from "@/types/ProjectData";
 
-export const AddFilesDialog: React.FC<{ onAfterUpload: () => void }> = (props) => {
-  const { onAfterUpload } = props;
+type Props = {
+  onAfterUpload: () => void;
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
+};
+export const AddFilesDialog: React.FC<Props> = (props) => {
+  const { onAfterUpload, isOpen, setIsOpen } = props;
   const idToken = localStorage.getItem("idToken");
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
   const [base64Files, setBase64Files] = useState<IFileContent[]>([]);
   const [uploading, setUploading] = useState(false);
   const [addFileToProjectMutation] = useMutation(ADD_FILE_TO_PROJECT);
+  const [updateReferenceStatus] = useMutation(UPDATE_REF_STATUS);
 
   // Toggle modal visibility
   const toggleModal = () => {
@@ -40,7 +46,8 @@ export const AddFilesDialog: React.FC<{ onAfterUpload: () => void }> = (props) =
           resolve({
             fileName: file.name,
             fileContent: replaceBase64(reader.result as string),
-            contentType: file.type
+            contentType: file.type,
+            fileSize: file.size
           });
         reader.onerror = reject;
       });
@@ -84,9 +91,35 @@ export const AddFilesDialog: React.FC<{ onAfterUpload: () => void }> = (props) =
       })
         .then(async (res: any) => {
           if (res.data?.AddFileToProject?.status === 200) {
+            const respData = res.data?.AddFileToProject?.data?.urls;
+            for (const element of respData) {
+              const file = base64Files.find((file) => file.fileName === element.key);
+              if (!file) {
+                continue;
+              }
+              const url = element.url;
+              const binaryData = Uint8Array.from(atob(file.fileContent || ""), (c) => c.charCodeAt(0));
+              const fileUploadRes = await fetch(url, {
+                method: "PUT",
+                headers: {
+                  "Content-Type": file.contentType || "application/octet-stream"
+                },
+                body: binaryData // Direct string content
+              });
+              if (!fileUploadRes.ok) {
+                toast.error("Failed to upload file!, " + element.key);
+              } else {
+                const filRefId = res.data?.AddFileToProject?.data?.refs?.find((ref: any) => ref.name === element.key)?.id;
+                await updateReferenceStatusMutation({
+                  fileId: filRefId || "",
+                  status: "UPLOADED"
+                });
+              }
+            }
             setUploading(false);
+            toggleModal();
             onAfterUpload();
-            toast.success("Project updated successfully!");
+            toast.success("File uploaded successfully!");
           } else {
             setUploading(false);
             toast.error(res.data?.AddFileToProject?.error);
@@ -101,7 +134,16 @@ export const AddFilesDialog: React.FC<{ onAfterUpload: () => void }> = (props) =
         });
     }
   };
-
+  const updateReferenceStatusMutation = async (content: { fileId: string; status: string }): Promise<FetchResult<any>> => {
+    return updateReferenceStatus({
+      variables: { ...content },
+      context: {
+        headers: {
+          identity: idToken
+        }
+      }
+    });
+  };
   const getHashedFile = async (data: any) => {
     const metadata = JSON.stringify(data);
     const hash = CryptoJS.SHA256(metadata).toString(CryptoJS.enc.Hex);
@@ -128,20 +170,20 @@ export const AddFilesDialog: React.FC<{ onAfterUpload: () => void }> = (props) =
   return (
     <div>
       <Toaster />
-      <Button variant={"default"} className="" onClick={toggleModal}>
+      {/* <Button variant={"default"} className="" onClick={toggleModal}>
         <Plus size={16} /> Add files
-      </Button>
+      </Button> */}
 
       {/* Modal */}
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={toggleModal}>
-          <DialogContent className="">
+          <DialogContent className="rounded-2xl">
             <DialogHeader className="text-primary">Upload File</DialogHeader>
 
             {/* Drag and Drop Area */}
             <div
               {...getRootProps()}
-              className="border-2 border-dashed border-muted-foreground bg-muted p-10 mt-5 text-center cursor-pointer"
+              className="rounded-2xl border-2 border-dashed border-muted-foreground bg-muted p-14 mt-5 text-center cursor-pointer"
             >
               <input {...getInputProps()} />
               <p className="text-muted-foreground hover:opacity-80 ho ">Drag & Drop files here, or click to select files</p>
@@ -163,18 +205,18 @@ export const AddFilesDialog: React.FC<{ onAfterUpload: () => void }> = (props) =
             )}
 
             {/* Close button */}
-            <div className="flex justify-center mt-10">
+            <div className="flex justify-center gap-1 mt-10">
+              <Button size={"sm"} variant={"secondary"} onClick={toggleModal}>
+                Close
+              </Button>
               <Button
                 size={"sm"}
                 variant={"default"}
-                className={` flex justify-between items-center ${uploading && "cursor-not-allowed opacity-70"}`}
+                className={` flex justify-between gap-1 items-center ${uploading && "cursor-not-allowed opacity-70"}`}
                 onClick={onUpload}
               >
+                {uploading && <Loader2Icon size={16} className="text-black/90 animate-spin" />}
                 Upload
-                {uploading && <Loader2Icon size={18} className="text-black/90 animate-spin" />}
-              </Button>
-              <Button size={"sm"} variant={"secondary"} onClick={toggleModal} className=" ml-3">
-                Close
               </Button>
             </div>
           </DialogContent>

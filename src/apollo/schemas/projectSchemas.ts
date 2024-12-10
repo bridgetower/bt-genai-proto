@@ -86,8 +86,8 @@ export const ADD_FILE_TO_PROJECT = gql`
   }
 `;
 export const FETCH_MY_FILE_REQ_LIST = gql`
-  query MyQuery($pageNo: Int!, $limit: Int!) {
-    ListReferenceByCustomer(input: { limit: $limit, pageNo: $pageNo }) {
+  query MyQuery($pageNo: Int!, $limit: Int!, $projectId: String!) {
+    ListReferenceByCustomer(input: { limit: $limit, pageNo: $pageNo, projectId: $projectId }) {
       data {
         refs {
           createdat
@@ -105,6 +105,28 @@ export const FETCH_MY_FILE_REQ_LIST = gql`
         }
         total
         totalPages
+      }
+      error
+      status
+    }
+  }
+`;
+export const UPDATE_REF_STATUS = gql`
+  mutation Mymutation($fileId: String!, $status: String!) {
+    UpdateReferenceStatus(input: { files: { id: $fileId, status: $status } }) {
+      data {
+        createdat
+        datasourceid
+        depth
+        id
+        ingested
+        ingestionjobid
+        name
+        referencestage
+        reftype
+        size
+        status
+        url
       }
       error
       status

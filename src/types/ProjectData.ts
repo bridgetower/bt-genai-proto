@@ -65,7 +65,7 @@ export enum ProjectStatusEnum {
   CANCELLED = "CANCELLED",
   ACTIVE = "ACTIVE"
 }
-export type ActionStatus = "INITIATED" | "ACTIVE" | "ERROR" | "CANCELLED" | "COMPLETED" | "PENDING" | "APPROVED" | "REJECTED";
+export type ActionStatus = "INITIATED" | "ACTIVE" | "ERROR" | "CANCELLED" | "COMPLETED" | "PENDING" | "APPROVED" | "REJECTED" | "UPLOADED";
 
 export const statusColor: Record<ActionStatus, { bg: string; text: string }> = {
   INITIATED: {
@@ -99,6 +99,10 @@ export const statusColor: Record<ActionStatus, { bg: string; text: string }> = {
   REJECTED: {
     bg: "bg-red-100",
     text: "text-red-600"
+  },
+  UPLOADED: {
+    bg: "bg-yellow-100",
+    text: "text-yellow-600"
   }
 };
 

@@ -1,5 +1,6 @@
 import { useQuery } from "@apollo/client";
 import { ColumnDef } from "@tanstack/react-table";
+import { Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 import { FETCH_MY_FILE_REQ_LIST } from "@/apollo/schemas/projectSchemas";
@@ -7,6 +8,7 @@ import { CommonHeader } from "@/components/common/commonHeader";
 import { DataTable } from "@/components/common/dataTable";
 import Pagination from "@/components/common/pagination";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActionStatus, statusColor } from "@/types/ProjectData";
 
@@ -94,6 +96,10 @@ export const MyFileRequestList: React.FC = () => {
   const [page, setPage] = useState(1);
   const [fileRequest, setFileRequest] = useState<any[]>([]);
   const memoizedFileRequest = React.useMemo(() => fileRequest, [fileRequest]);
+  const [showAddFileModal, setShowAddFileModal] = useState(false);
+  const projectId = process.env.REACT_APP_PROJECT_ID || "";
+  console.log(projectId);
+
   const {
     data: listdata,
     refetch,
@@ -102,7 +108,7 @@ export const MyFileRequestList: React.FC = () => {
     variables: {
       limit: pageLimit,
       pageNo: page,
-      projectId: process.env.REACT_APP_PROJECT_ID || ""
+      projectId: projectId
     },
     context: {
       headers: {
@@ -123,12 +129,15 @@ export const MyFileRequestList: React.FC = () => {
     });
     setFileRequest(st);
   }, [listdata]);
+  // useEffect(() => {
+  //   if (!idToken || !projectId) {
+  //     return;
+  //   }
+  //   refetch();
+  // }, [idToken, page, projectId]);
   useEffect(() => {
-    if (!idToken) {
-      return;
-    }
     refetch();
-  }, [idToken, page]);
+  }, []);
 
   const onPageChange = (page: number) => {
     setPage(page);
@@ -166,14 +175,20 @@ export const MyFileRequestList: React.FC = () => {
       setFileRequest(st);
     });
   };
+  const toggleAddFileModal = () => {
+    setShowAddFileModal(!showAddFileModal);
+  };
   return (
     <>
       <CommonHeader />
+      <AddFilesDialog onAfterUpload={refetchList} isOpen={showAddFileModal} setIsOpen={setShowAddFileModal} />
       <div className="p-4">
         <div className="bg-card rounded-2xl p-4">
           <div className="flex justify-between pb-4">
             <div className="uppercase text-md text-[#486581]">File Add Requests</div>
-            <AddFilesDialog onAfterUpload={refetchList} />
+            <Button variant={"default"} className="" onClick={toggleAddFileModal}>
+              <Plus size={16} /> Add files
+            </Button>
           </div>
           {loading ? (
             <>
