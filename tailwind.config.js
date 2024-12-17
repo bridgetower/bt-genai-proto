@@ -17,7 +17,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        firaSans: '"Fira Sans", sans-serif'
+        roboto: ["Roboto", "sans-serif"],
+        inter: ["Inter", "sans-serif"],
+        firaSans: ["Fira Sans", "sans-serif"]
       },
       fontSize: {
         h1: ["65px", "62px"], // Heading 1: 62/65

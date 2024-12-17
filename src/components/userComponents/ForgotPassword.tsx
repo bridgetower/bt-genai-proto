@@ -55,7 +55,13 @@ const ForgotPassword: React.FC = () => {
           <form className="space-y-6" onSubmit={formik.handleSubmit}>
             <div>
               <Label htmlFor="username">Username</Label>
-              <Input id="username" type="text" {...formik.getFieldProps("username")} placeholder="Enter registered email-id" />
+              <Input
+                id="username"
+                className="my-2"
+                type="text"
+                {...formik.getFieldProps("username")}
+                placeholder="Enter registered email-id"
+              />
               {formik.touched.username && formik.errors.username ? (
                 <div className="text-red-600 text-sm">{formik.errors.username}</div>
               ) : null}

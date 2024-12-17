@@ -5,7 +5,8 @@ import { ApolloProvider } from "@apollo/client";
 import React from "react";
 import { Toaster } from "react-hot-toast";
 
-import { apolloClient } from "./apollo/apolloClient";
+import { apolloClient } from "./apollo/authMiddleware";
+// import { apolloClient } from "./apollo/apolloClient";
 import AppRouter from "./AppRouter";
 
 const App: React.FC = () => {

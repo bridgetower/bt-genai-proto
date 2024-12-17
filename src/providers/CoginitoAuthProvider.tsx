@@ -169,6 +169,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
         const session = cognitoUser?.getSignInUserSession();
         setUserSession(session);
         const token = session?.getIdToken().getJwtToken();
+        localStorage.setItem("idToken", token || "");
         if (token) {
           const user = (await jwtDecode(token)) as ICognitoUser;
           setUser(user);
@@ -192,6 +193,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
           setIsAuthenticated(false);
         } else if (session && session.isValid()) {
           setUserSession(session);
+          localStorage.setItem("idToken", session?.getIdToken()?.getJwtToken() || "");
           setIsAuthenticated(true);
         }
       });
@@ -246,6 +248,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
         // Store the user data in localStorage
         try {
           setUserSession(session);
+          localStorage.setItem("idToken", session?.getIdToken()?.getJwtToken() || "");
           setIsAuthenticated(true);
           navigate("/");
         } catch (error) {
@@ -269,7 +272,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
           newUser.associateSoftwareToken({
             associateSecretCode: (secretCode) => {
               // navigate("setuptotp?secretCode=" + secretCode + "&username=" + username);
-              const otpauthUrl = `otpauth://totp/${encodeURIComponent("GeneAI")}:${encodeURIComponent(username ?? "")}?secret=${secretCode}&issuer=${encodeURIComponent("https://d2gyf9rwd0a9xd.cloudfront.net/")}`;
+              const otpauthUrl = `otpauth://totp/${encodeURIComponent("GeneAI")}:${encodeURIComponent(username ?? "")}?secret=${secretCode}&issuer=${encodeURIComponent("BridgeTower GeneAI ")}`;
               setMfaAuthUrl(otpauthUrl);
               setShowMfaSettingModal(true);
               setIsLoading(false);
@@ -300,6 +303,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
     setIsOtpVerifying(true);
     coginitoUser?.verifySoftwareToken(code, "", {
       onSuccess: (session) => {
+        localStorage.setItem("idToken", session?.getIdToken()?.getJwtToken() || "");
         setUserSession(session);
         setIsAuthenticated(true);
         setIsOtpVerifying(false);
@@ -323,6 +327,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
       {
         onSuccess: (session) => {
           try {
+            localStorage.setItem("idToken", session?.getIdToken()?.getJwtToken() || "");
             setUserSession(session);
             setIsAuthenticated(true);
             setShowVerifyOtp(false);

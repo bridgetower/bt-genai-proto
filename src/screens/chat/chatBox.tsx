@@ -70,8 +70,9 @@ const MessageContent: React.FC<{
 };
 
 const ChatBox: React.FC = () => {
+  const projectId = localStorage.getItem("projectId") || "";
   const [message, setMessage] = useState("");
-  const handleSend = useHandleMessageSend(message, setMessage);
+  const handleSend = useHandleMessageSend(message, setMessage, projectId);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const { chatContent, isWaitingForResponse, setShowRightPanel, showRightPanel, setJobId, setActiveSourceIndex, setSources } = useChat();
   const [copyToClipboard] = useCopyToClipboard();

@@ -1,15 +1,18 @@
-import { ChevronDown, MessageCircleMore, PowerIcon } from "lucide-react";
+import { ChevronDown, LibraryBig, MessageCircleMore, PowerIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { useAuth } from "@/providers/CoginitoAuthProvider";
 
-import Logo from "../common/logo";
+import { Logo } from "../common/logo";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 export const Sidebar: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const { logout, usersession } = useAuth(); // Assuming `user` contains name, email, and avatar.
   const location = useLocation();
+  // const naivgate = useNavigate();
+  const [projectId, setProjectId] = useState<string>(localStorage.getItem("projectId") || "");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
@@ -27,6 +30,12 @@ export const Sidebar: React.FC = () => {
   };
 
   const activeItem = getActiveItem();
+
+  const handleProjectChange = (value: string) => {
+    setProjectId(value);
+    localStorage.setItem("projectId", projectId);
+    // naivgate("/chat");
+  };
 
   return (
     <div className="min-h-screen bg-navbackground text-navforeground shadow-lg flex flex-col">
@@ -66,6 +75,20 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Footer */}
+      <div className="p-6">
+        <Select onValueChange={handleProjectChange} defaultValue={projectId}>
+          <SelectTrigger className="w-full border-none rounded-lg bg-gray-800 text-white hover:text-yellow-400 ring-offset-transparent focus:ring-0 focus:ring-offset-0">
+            <div className="flex items-center gap-1 ">
+              <LibraryBig size={16} /> <SelectValue placeholder="Select a project" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={process.env.REACT_APP_PROJECT_ID || ""}>Project 1</SelectItem>
+            <SelectItem value="p1">Project 2</SelectItem>
+            <SelectItem value="p2">Project 3</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <div className="border-t border-gray-700 p-4">
         <div className="flex items-start justify-between cursor-pointer" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
           {/* User Info */}
