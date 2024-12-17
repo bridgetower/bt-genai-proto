@@ -1,19 +1,37 @@
+import { useQuery } from "@apollo/client";
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { FETCH_PROJECT_DDL_LIST } from "@/apollo/schemas/projectSchemas";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const LandingPage: React.FC = () => {
+  const token = localStorage.getItem("idToken");
   const navigate = useNavigate();
   const [projectId, setProjectId] = useState<string>("");
+  const [projectList, setProjectList] = useState([]);
   const [getStartedClicked, setGetStartedClicked] = useState(false);
 
+  const { data: projectListData } = useQuery(FETCH_PROJECT_DDL_LIST, {
+    variables: {
+      pageNo: 1,
+      limit: 1000,
+      organizationId: "3f0d758e-84c9-4a3d-b15a-da7a0c2229ba"
+    },
+    context: {
+      apiVersion: "admin",
+      headers: {
+        identity: token
+      }
+    }
+  });
+
   useEffect(() => {
-    console.log("LandingPage component mounted");
-  }, []);
+    setProjectList(projectListData?.ListProject?.data?.projects || []);
+  }, [projectListData]);
 
   const handleSelectChange = (value: string) => {
     setProjectId(value);
@@ -59,9 +77,11 @@ const LandingPage: React.FC = () => {
               <SelectValue placeholder="Select a project" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={process.env.REACT_APP_PROJECT_ID || ""}>Project 1</SelectItem>
-              <SelectItem value={process.env.REACT_APP_PROJECT_ID || ""}>Project 2</SelectItem>
-              <SelectItem value={process.env.REACT_APP_PROJECT_ID || ""}>Project 3</SelectItem>
+              {projectList.map((project: any) => (
+                <SelectItem key={project.id} value={project.id}>
+                  {project.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 

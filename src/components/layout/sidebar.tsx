@@ -1,20 +1,41 @@
+import { useQuery } from "@apollo/client";
 import { ChevronDown, LibraryBig, MessageCircleMore, PowerIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
+import { FETCH_PROJECT_DDL_LIST } from "@/apollo/schemas/projectSchemas";
 import { useAuth } from "@/providers/CoginitoAuthProvider";
 
 import { Logo } from "../common/logo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 export const Sidebar: React.FC = () => {
+  const token = localStorage.getItem("idToken");
   const [user, setUser] = useState<any>(null);
+  const [projectList, setProjectList] = useState([]);
   const { logout, usersession } = useAuth(); // Assuming `user` contains name, email, and avatar.
   const location = useLocation();
   // const naivgate = useNavigate();
   const [projectId, setProjectId] = useState<string>(localStorage.getItem("projectId") || "");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const { data: projectListData } = useQuery(FETCH_PROJECT_DDL_LIST, {
+    variables: {
+      pageNo: 1,
+      limit: 1000,
+      organizationId: "3f0d758e-84c9-4a3d-b15a-da7a0c2229ba"
+    },
+    context: {
+      apiVersion: "admin",
+      headers: {
+        identity: token
+      }
+    }
+  });
+
+  useEffect(() => {
+    setProjectList(projectListData?.ListProject?.data?.projects || []);
+  }, [projectListData]);
   useEffect(() => {
     if (usersession) {
       setUser(usersession.getIdToken().payload);
@@ -83,9 +104,11 @@ export const Sidebar: React.FC = () => {
             </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={process.env.REACT_APP_PROJECT_ID || ""}>Project 1</SelectItem>
-            <SelectItem value="p1">Project 2</SelectItem>
-            <SelectItem value="p2">Project 3</SelectItem>
+            {projectList.map((project: any) => (
+              <SelectItem key={project.id} value={project.id}>
+                {project.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
