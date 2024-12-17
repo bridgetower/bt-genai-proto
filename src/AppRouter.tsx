@@ -6,6 +6,7 @@ import { ProtectedLoyout } from "./components/layout/ProtectedLayout";
 import { ChatProvider } from "./providers/chatProvider";
 import { AuthProvider } from "./providers/CoginitoAuthProvider";
 import { ChatPage } from "./screens/chat";
+import { LandingPage } from "./screens/landing/LandingPage";
 import LoginPage from "./screens/login/Login";
 import { MyFileRequestList } from "./screens/myRequests/MyFileRequestList";
 import PageNotFound from "./screens/page-not-found/pageNotFound";
@@ -23,6 +24,10 @@ const AppRouters: React.FC = () => {
           children: [
             {
               path: "/",
+              element: <LandingPage />
+            },
+            {
+              path: "/chat",
               element: (
                 <>
                   <ChatProvider>
@@ -31,6 +36,7 @@ const AppRouters: React.FC = () => {
                 </>
               )
             },
+
             {
               path: "my-file-requests",
               element: <MyFileRequestList />

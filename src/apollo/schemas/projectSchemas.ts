@@ -133,3 +133,24 @@ export const UPDATE_REF_STATUS = gql`
     }
   }
 `;
+
+//Subscriptions
+export const PROJECT_UPDATE_SUBSCRIPTION = gql`
+  subscription MySubscription {
+    onAddFileToProjectByAdmin {
+      data {
+        refs {
+          createdat
+          id
+          name
+          projectid
+          referencestage
+          reftype
+          size
+          status
+          url
+        }
+      }
+    }
+  }
+`;

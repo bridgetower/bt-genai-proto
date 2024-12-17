@@ -37,7 +37,10 @@ const TransactionPanel: React.FC<Props> = (props) => {
   const [latestConfirmations, setLatestConfirmations] = React.useState<string | null>(null);
   const { loading, fetch, data: transactionData } = useGetBlockchainTxData(job_id);
   const [transactionId, setTransactionId] = React.useState<string>("");
-  const { refetch } = useQuery(GET_BLOCKCHAIN_DATA_BY_HASH, { variables: { chainType: "Avalanche", transactionHash: transactionId } });
+  const { refetch } = useQuery(GET_BLOCKCHAIN_DATA_BY_HASH, {
+    variables: { chainType: "Avalanche", transactionHash: transactionId },
+    context: { headers: { identity: localStorage.getItem("idToken") || "" } }
+  });
 
   useEffect(() => {
     if (job_id) {

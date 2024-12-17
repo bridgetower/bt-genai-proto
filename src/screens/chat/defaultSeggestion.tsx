@@ -18,8 +18,9 @@ const defaultSuggestion = [
   }
 ];
 export const DefaultSuggestions: React.FC = () => {
+  const projectId = localStorage.getItem("projectId") || "";
   const [message, setMessage] = useState("");
-  const handleSend = useHandleMessageSend(message, setMessage);
+  const handleSend = useHandleMessageSend(message, setMessage, projectId);
   const handleSelect = (msg: string) => {
     setMessage(msg);
   };

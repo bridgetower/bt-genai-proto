@@ -97,8 +97,9 @@ export const MyFileRequestList: React.FC = () => {
   const [fileRequest, setFileRequest] = useState<any[]>([]);
   const memoizedFileRequest = React.useMemo(() => fileRequest, [fileRequest]);
   const [showAddFileModal, setShowAddFileModal] = useState(false);
-  const projectId = process.env.REACT_APP_PROJECT_ID || "";
-  console.log(projectId);
+  const projectId = localStorage.getItem("projectId") || "";
+
+  // console.log(projectId);
 
   const {
     data: listdata,
@@ -148,7 +149,7 @@ export const MyFileRequestList: React.FC = () => {
     header: "Status",
     cell: ({ row }: any) => {
       const dataSet = row.original;
-      console.log(dataSet);
+      // console.log(dataSet);
 
       return (
         <>
