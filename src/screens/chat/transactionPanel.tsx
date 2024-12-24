@@ -1,9 +1,7 @@
-import { useQuery } from "@apollo/client";
 import { formatDate, formatDistance } from "date-fns";
 import { CopyIcon } from "lucide-react";
 import React, { useEffect } from "react";
 
-import { GET_BLOCKCHAIN_DATA_BY_HASH } from "@/apollo/schemas/getdatabyhash";
 import TxHashLoader from "@/components/Loaders/hashLoader";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useGetBlockchainTxData } from "@/hooks/useGetBlockchainTxData";
@@ -37,10 +35,10 @@ const TransactionPanel: React.FC<Props> = (props) => {
   const [latestConfirmations, setLatestConfirmations] = React.useState<string | null>(null);
   const { loading, fetch, data: transactionData } = useGetBlockchainTxData(job_id);
   const [transactionId, setTransactionId] = React.useState<string>("");
-  const { refetch } = useQuery(GET_BLOCKCHAIN_DATA_BY_HASH, {
-    variables: { chainType: "Avalanche", transactionHash: transactionId },
-    context: { headers: { identity: localStorage.getItem("idToken") || "" } }
-  });
+  // const { refetch } = useQuery(GET_BLOCKCHAIN_DATA_BY_HASH, {
+  //   variables: { chainType: "Avalanche", transactionHash: transactionId },
+  //   context: { headers: { identity: localStorage.getItem("idToken") || "" } }
+  // });
 
   useEffect(() => {
     if (job_id) {
@@ -50,21 +48,21 @@ const TransactionPanel: React.FC<Props> = (props) => {
   }, [job_id]);
   useEffect(() => {
     if (transactionData) {
-      setTransactionId(transactionData.txHash.S);
+      setTransactionId(transactionData.txHash);
     }
   }, [transactionData]);
 
-  useEffect(() => {
-    if (transactionId) {
-      refetch()
-        .then((res) => {
-          setLatestConfirmations(res.data?.GetHashTransaction?.data?.confirmations || null);
-        })
-        .catch((e) => {
-          console.log("Error fetching transaction data", e);
-        });
-    }
-  }, [transactionId]);
+  // useEffect(() => {
+  //   if (transactionId) {
+  //     refetch()
+  //       .then((res) => {
+  //         setLatestConfirmations(res.data?.GetHashTransaction?.data?.confirmations || null);
+  //       })
+  //       .catch((e) => {
+  //         console.log("Error fetching transaction data", e);
+  //       });
+  //   }
+  // }, [transactionId]);
   return (
     <div className="px-6 pt-4 ">
       {loading && <TxHashLoader />}
@@ -72,25 +70,25 @@ const TransactionPanel: React.FC<Props> = (props) => {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
             {/* Each detail in a KPI card */}
-            <Card value={transactionData?.blockNumber?.S} title="Block Number" showCopyIcon={true} />
-            <Card value={transactionData?.chainId?.S} title="Chain Id" showCopyIcon={true} />
-            <Card value={transactionData?.status?.S} title="Status" />
+            <Card value={transactionData?.blockNumber} title="Block Number" showCopyIcon={true} />
+            <Card value={transactionData?.chainId} title="Chain Id" showCopyIcon={true} />
+            <Card value={transactionData?.status} title="Status" />
           </div>
           <div className="pt-5">
-            <InlineDetails value={transactionData?.hash?.S} title="Content Hash" showCopyIcon={true} />
-            <InlineDetails value={transactionData?.blockHash?.S} title="Block Hash" showCopyIcon={true} />
-            <InlineDetails value={transactionData?.txHash?.S} title="Transaction Hash" showCopyIcon={true} />
-            {/* <InlineDetails value={transactionData?.metaData?.S} title="Metadata Hash" showCopyIcon={true} /> */}
-            <InlineDetails value={transactionData?.from?.S} title="From" showCopyIcon={true} />
-            <InlineDetails value={transactionData?.to?.S} title="To" showCopyIcon={true} />
-            <InlineDetails value={latestConfirmations ? latestConfirmations : transactionData?.confirmations?.S} title="Confirmation" />
-            <InlineDetails value={transactionData?.message?.S} title="Message" />
-            <InlineDetails value={parseFloat(transactionData?.gasFee?.S) + " AVAX"} title="Gas used" />
+            <InlineDetails value={transactionData?.hash} title="Content Hash" showCopyIcon={true} />
+            <InlineDetails value={transactionData?.blockHash} title="Block Hash" showCopyIcon={true} />
+            <InlineDetails value={transactionData?.txHash} title="Transaction Hash" showCopyIcon={true} />
+            {/* <InlineDetails value={transactionData?.metaData} title="Metadata Hash" showCopyIcon={true} /> */}
+            <InlineDetails value={transactionData?.from} title="From" showCopyIcon={true} />
+            <InlineDetails value={transactionData?.to} title="To" showCopyIcon={true} />
+            <InlineDetails value={transactionData?.confirmations} title="Confirmation" />
+            <InlineDetails value={transactionData?.message} title="Message" />
+            <InlineDetails value={parseFloat(transactionData?.gasFee) + " AVAX"} title="Gas used" />
             <InlineDetails
               value={
-                formatDistance(transactionData?.timestamp?.S, new Date(), { addSuffix: true, includeSeconds: true }) +
+                formatDistance(transactionData?.timestamp, new Date(), { addSuffix: true, includeSeconds: true }) +
                 " (" +
-                formatDate(transactionData?.timestamp?.S, "MMM dd yyyy, mm:hh a") +
+                formatDate(transactionData?.timestamp, "MMM dd yyyy, mm:hh a") +
                 ")"
               }
               title="Timestamp"
@@ -101,7 +99,7 @@ const TransactionPanel: React.FC<Props> = (props) => {
           <hr className="my-6" />
           <div className="flex justify-center pt-5">
             <a
-              href={`https://testnet.snowtrace.io/tx/${transactionData.txHash.S}`}
+              href={`https://testnet.snowtrace.io/tx/${transactionData.txHash}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex justify-between items-center w-fit text-lg font-semibold bg-white text-red-500 border border-red-500 px-4 py-2 rounded-lg shadow hover:opacity-90 transition-colors"

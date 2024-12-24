@@ -1,20 +1,42 @@
+import { useQuery } from "@apollo/client";
 import { ChevronDown, LibraryBig, MessageCircleMore, PowerIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
+import { FETCH_PROJECT_DDL_LIST } from "@/apollo/schemas/projectSchemas";
 import { useAuth } from "@/providers/CoginitoAuthProvider";
+import { useProjectId } from "@/store/projectIdStore";
 
 import { Logo } from "../common/logo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 export const Sidebar: React.FC = () => {
+  const token = localStorage.getItem("idToken");
   const [user, setUser] = useState<any>(null);
+  const [projectList, setProjectList] = useState([]);
   const { logout, usersession } = useAuth(); // Assuming `user` contains name, email, and avatar.
   const location = useLocation();
   // const naivgate = useNavigate();
-  const [projectId, setProjectId] = useState<string>(localStorage.getItem("projectId") || "");
+  const { projectId, setProjectId } = useProjectId();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const { data: projectListData } = useQuery(FETCH_PROJECT_DDL_LIST, {
+    variables: {
+      pageNo: 1,
+      limit: 1000,
+      organizationId: "3f0d758e-84c9-4a3d-b15a-da7a0c2229ba"
+    },
+    context: {
+      apiVersion: "admin",
+      headers: {
+        identity: token
+      }
+    }
+  });
+
+  useEffect(() => {
+    setProjectList(projectListData?.ListProject?.data?.projects || []);
+  }, [projectListData]);
   useEffect(() => {
     if (usersession) {
       setUser(usersession.getIdToken().payload);
@@ -33,7 +55,6 @@ export const Sidebar: React.FC = () => {
 
   const handleProjectChange = (value: string) => {
     setProjectId(value);
-    localStorage.setItem("projectId", projectId);
     // naivgate("/chat");
   };
 
@@ -49,7 +70,7 @@ export const Sidebar: React.FC = () => {
         <ul className="mt-8">
           <li className="group px-6">
             <Link
-              to="/"
+              to="/chat"
               className={`block text-start text-base px-6 py-3 transform transition-all duration-300 ease-in-out rounded-full group-hover:bg-gray-800 group-hover:pl-10 group-hover:text-yellow-400 ${
                 activeItem === "Chat" ? "bg-gray-800 pl-10 text-yellow-400" : ""
               }`}
@@ -76,16 +97,18 @@ export const Sidebar: React.FC = () => {
 
       {/* Footer */}
       <div className="p-6">
-        <Select onValueChange={handleProjectChange} defaultValue={projectId}>
+        <Select onValueChange={handleProjectChange} defaultValue={projectId || ""}>
           <SelectTrigger className="w-full border-none rounded-lg bg-gray-800 text-white hover:text-yellow-400 ring-offset-transparent focus:ring-0 focus:ring-offset-0">
             <div className="flex items-center gap-1 ">
               <LibraryBig size={16} /> <SelectValue placeholder="Select a project" />
             </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={process.env.REACT_APP_PROJECT_ID || ""}>Project 1</SelectItem>
-            <SelectItem value="p1">Project 2</SelectItem>
-            <SelectItem value="p2">Project 3</SelectItem>
+            {projectList.map((project: any) => (
+              <SelectItem key={project.id} value={project.id}>
+                {project.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

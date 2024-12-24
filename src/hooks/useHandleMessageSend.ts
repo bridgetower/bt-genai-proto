@@ -3,6 +3,7 @@ import { toast } from "react-hot-toast";
 
 import { useAuth } from "@/providers/CoginitoAuthProvider";
 import { useChat } from "@/store/chatStore";
+import { useProjectId } from "@/store/projectIdStore";
 import { SourceReference } from "@/types";
 
 // GraphQL Mutation
@@ -18,15 +19,16 @@ const GENERATE_QUERY_ANSWER = gql`
   }
 `;
 
-export const useHandleMessageSend = (message: string, setMessage: React.Dispatch<React.SetStateAction<string>>, projectId: string) => {
+export const useHandleMessageSend = (message: string, setMessage: React.Dispatch<React.SetStateAction<string>>) => {
   const { usersession } = useAuth();
   const { latestSessionId, setIsWaitingForResponse, setLatestSessionId, setChatContent } = useChat();
-
+  const { projectId } = useProjectId();
   const [generateQueryAnswer] = useMutation(GENERATE_QUERY_ANSWER);
 
   const submit = async () => {
     if (message.trim() === "") return;
     const token = localStorage.getItem("idToken") || "";
+    // const projectId = localStorage.getItem("projectId") || "";
     setIsWaitingForResponse(true);
     setChatContent((prev: any) => [
       ...prev,
@@ -40,6 +42,7 @@ export const useHandleMessageSend = (message: string, setMessage: React.Dispatch
     ]);
 
     try {
+      setMessage("");
       const { data } = await generateQueryAnswer({
         variables: {
           message,

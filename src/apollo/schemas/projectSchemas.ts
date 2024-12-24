@@ -133,7 +133,21 @@ export const UPDATE_REF_STATUS = gql`
     }
   }
 `;
-
+export const FETCH_PROJECT_DDL_LIST = gql`
+  query MyQuery($pageNo: Int!, $limit: Int!, $organizationId: String!) {
+    ListProject(input: { pageNo: $pageNo, limit: $limit, organizationId: $organizationId }) {
+      data {
+        projects {
+          id
+          name
+          isactive
+        }
+      }
+      error
+      status
+    }
+  }
+`;
 //Subscriptions
 export const PROJECT_UPDATE_SUBSCRIPTION = gql`
   subscription MySubscription {

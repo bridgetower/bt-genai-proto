@@ -22,6 +22,11 @@ const ProjectDetails: React.FC<{ id: string }> = (props) => {
       docPage,
       rowLimit
     },
+    context: {
+      headers: {
+        identity: localStorage.getItem("idToken")
+      }
+    },
     fetchPolicy: "cache-and-network"
   });
   // const { project: projectDetails, refetch, stages, pagination, loading, error, loadMore, status } = useProjectDetails(id);

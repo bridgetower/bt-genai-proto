@@ -1,3 +1,4 @@
+import { useLazyQuery } from "@apollo/client";
 import {
   AuthenticationDetails,
   CognitoAccessToken,
@@ -13,6 +14,10 @@ import { jwtDecode } from "jwt-decode";
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Outlet, useNavigate } from "react-router-dom";
+
+import { SIGN_IN_QUERY } from "@/apollo/schemas/signin";
+import { Loader } from "@/components/loader/Loader";
+import { IDBUser } from "@/types/user";
 
 import ErrorPopup from "../components/errorAlert/ErrorPopup";
 
@@ -77,6 +82,7 @@ export interface AuthContextProps {
   changePassword: (username: string, oldPassword: string, newPassword: string) => void;
   isCheckingAuth: boolean;
   usersession: CognitoUserSession | null | undefined;
+  dbUser: IDBUser | null;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -90,6 +96,10 @@ const poolData: ICognitoUserPoolData = {
 
 const userPool = new CognitoUserPool(poolData);
 
+let logoutReference: any = null;
+export const getLogoutFunction = () => {
+  return logoutReference;
+};
 export const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const navigate = useNavigate();
 
@@ -105,7 +115,25 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
   const [showMfaSettingModal, setShowMfaSettingModal] = useState<boolean>(false);
   const [showVerifySignupModal, setShowVerifySignupModal] = useState<boolean>(false);
   const [usersession, setUserSession] = useState<CognitoUserSession | null | undefined>(null);
+  const [isSigningUser, setIsSigningUser] = useState(false);
+  const [dbUser, setDbUser] = useState<IDBUser | null>(null);
 
+  const [onSignIn] = useLazyQuery(SIGN_IN_QUERY);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const [user] = await Promise.all([localStorage.getItem("bt-customer")]);
+      if (user) {
+        setDbUser(JSON.parse(user));
+        setIsAuthenticated(true);
+        setIsCheckingAuth(false);
+      } else {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
@@ -204,6 +232,47 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
     restoreSession();
   }, []);
 
+  async function getSignedInUserData(oidcToken: string) {
+    try {
+      setIsSigningUser(true);
+      const user = (await jwtDecode(oidcToken)) as any;
+      const response = await onSignIn({
+        variables: { tenantUserId: user?.email },
+        context: {
+          headers: {
+            identity: oidcToken
+          }
+        }
+      });
+      setIsLoading(false);
+      // Check if there's any error in the response
+      if (response.error?.graphQLErrors) {
+        toast.error(response.error?.graphQLErrors[0]?.message || "An error occurred");
+        return;
+      }
+      const signInData = response?.data?.Signin?.data;
+      if (signInData && response.data.Signin.status === 200) {
+        setDbUser(signInData);
+        localStorage.setItem("bt-customer", JSON.stringify(signInData));
+        localStorage.setItem("idToken", oidcToken);
+        navigate("/");
+      } else {
+        toast.error(response.data.Signin.error);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      console.error(error);
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setIsSigningUser(false);
+    }
+  }
+
+  // Function for setting user from token
+  const setUserFromToken = async (token: string) => {
+    await getSignedInUserData(token);
+    // await handleCreateCurrentAdminWallet(token);
+  };
   const handleUserSession = (tokens: { access_token: string; id_token: string; refresh_token?: string }) => {
     const userData = {
       Username: "SOCIAL_LOGIN_USER", // Placeholder username as it's a federated login
@@ -250,6 +319,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
           setUserSession(session);
           localStorage.setItem("idToken", session?.getIdToken()?.getJwtToken() || "");
           setIsAuthenticated(true);
+          setUserFromToken(session.getIdToken().getJwtToken());
           navigate("/");
         } catch (error) {
           console.error("Error storing user data:", error);
@@ -304,6 +374,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
     coginitoUser?.verifySoftwareToken(code, "", {
       onSuccess: (session) => {
         localStorage.setItem("idToken", session?.getIdToken()?.getJwtToken() || "");
+        setUserFromToken(session.getIdToken().getJwtToken());
         setUserSession(session);
         setIsAuthenticated(true);
         setIsOtpVerifying(false);
@@ -328,6 +399,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
         onSuccess: (session) => {
           try {
             localStorage.setItem("idToken", session?.getIdToken()?.getJwtToken() || "");
+            setUserFromToken(session.getIdToken().getJwtToken());
             setUserSession(session);
             setIsAuthenticated(true);
             setShowVerifyOtp(false);
@@ -558,6 +630,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
       if (cognitoUser) {
         // LocalStorageService.removeItem("bt-customer");
         localStorage.clear();
+        setDbUser(null);
         cognitoUser.signOut(() => {
           setIsAuthenticated(false);
           setUserSession(null);
@@ -568,6 +641,7 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
       console.error("Error removing user data:", error);
     }
   };
+  logoutReference = logout;
   const updateUserAttributes = (attributeList: CognitoUserAttribute[]) => {
     const cognitoUser = userPool.getCurrentUser();
     if (cognitoUser) {
@@ -648,12 +722,14 @@ export const AuthProvider = ({ children }: { children?: ReactNode }) => {
         resetPassword,
         verifyTOTP,
         verifyAssociateSoftwareToken,
-        changePassword
+        changePassword,
+        dbUser
       }}
     >
       {/* <Loader show={isCheckingAuth} /> */}
       <ErrorPopup open={!!error} message={error} onClose={() => setError("")} />
       <Toaster />
+      {isSigningUser && <Loader show />}
       {children ? children : <Outlet />}
     </AuthContext.Provider>
   );

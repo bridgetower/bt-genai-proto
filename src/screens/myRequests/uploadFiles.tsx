@@ -1,11 +1,11 @@
-import { FetchResult, useMutation, useSubscription } from "@apollo/client";
+import { FetchResult, useMutation } from "@apollo/client";
 import CryptoJS from "crypto-js";
 import { Loader2Icon } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import toast, { Toaster } from "react-hot-toast";
 
-import { ADD_FILE_TO_PROJECT, PROJECT_UPDATE_SUBSCRIPTION, UPDATE_REF_STATUS } from "@/apollo/schemas/projectSchemas";
+import { ADD_FILE_TO_PROJECT, UPDATE_REF_STATUS } from "@/apollo/schemas/projectSchemas";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { IFileContent } from "@/types/ProjectData";
@@ -24,22 +24,22 @@ export const AddFilesDialog: React.FC<Props> = (props) => {
   const [uploading, setUploading] = useState(false);
   const [addFileToProjectMutation] = useMutation(ADD_FILE_TO_PROJECT);
   const [updateReferenceStatus] = useMutation(UPDATE_REF_STATUS);
-  const {
-    data: subscriptionData,
-    loading: loadingMsg,
-    error
-  } = useSubscription(PROJECT_UPDATE_SUBSCRIPTION, {
-    context: {
-      headers: {
-        identity: idToken
-      }
-    }
-  });
+  // const {
+  //   data: subscriptionData,
+  //   loading: loadingMsg,
+  //   error
+  // } = useSubscription(PROJECT_UPDATE_SUBSCRIPTION, {
+  //   context: {
+  //     headers: {
+  //       identity: idToken
+  //     }
+  //   }
+  // });
 
-  useEffect(() => {
-    console.log("subscriptionData", loadingMsg, subscriptionData);
-    console.log("subscriptionError", error);
-  }, [subscriptionData, error, loadingMsg]);
+  // useEffect(() => {
+  //   console.log("subscriptionData", loadingMsg, subscriptionData);
+  //   console.log("subscriptionError", error);
+  // }, [subscriptionData, error, loadingMsg]);
 
   // Toggle modal visibility
   const toggleModal = () => {
