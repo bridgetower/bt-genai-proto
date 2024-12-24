@@ -54,12 +54,12 @@ const MessageContent: React.FC<{
       {parts.map((part, i) => {
         if (i % 2 === 0) return part;
         const index = parseInt(part, 10);
-        if (index < 0 || index >= sources.length) return `Source[${part}]`;
+        if (index < 0 || index >= sources.length + 1) return `Source[${part}]`;
         return (
           <SourceLink
             key={`source-${index}`}
             sourceReference={sourceReference}
-            source={sources[index]}
+            source={sources[index - 1]}
             index={index}
             onClickHandler={onClickHandler}
           />
@@ -70,9 +70,9 @@ const MessageContent: React.FC<{
 };
 
 const ChatBox: React.FC = () => {
-  const projectId = localStorage.getItem("projectId") || "";
+  // const projectId = localStorage.getItem("projectId") || "";
   const [message, setMessage] = useState("");
-  const handleSend = useHandleMessageSend(message, setMessage, projectId);
+  const handleSend = useHandleMessageSend(message, setMessage);
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const { chatContent, isWaitingForResponse, setShowRightPanel, showRightPanel, setJobId, setActiveSourceIndex, setSources } = useChat();
   const [copyToClipboard] = useCopyToClipboard();

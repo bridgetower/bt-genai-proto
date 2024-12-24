@@ -53,8 +53,8 @@ export const Sidebar: React.FC = () => {
   const activeItem = getActiveItem();
 
   const handleProjectChange = (value: string) => {
-    setProjectId(value);
     localStorage.setItem("projectId", projectId);
+    setProjectId(value);
     // naivgate("/chat");
   };
 
@@ -70,7 +70,7 @@ export const Sidebar: React.FC = () => {
         <ul className="mt-8">
           <li className="group px-6">
             <Link
-              to="/"
+              to="/chat"
               className={`block text-start text-base px-6 py-3 transform transition-all duration-300 ease-in-out rounded-full group-hover:bg-gray-800 group-hover:pl-10 group-hover:text-yellow-400 ${
                 activeItem === "Chat" ? "bg-gray-800 pl-10 text-yellow-400" : ""
               }`}

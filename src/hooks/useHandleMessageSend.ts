@@ -18,7 +18,7 @@ const GENERATE_QUERY_ANSWER = gql`
   }
 `;
 
-export const useHandleMessageSend = (message: string, setMessage: React.Dispatch<React.SetStateAction<string>>, projectId: string) => {
+export const useHandleMessageSend = (message: string, setMessage: React.Dispatch<React.SetStateAction<string>>) => {
   const { usersession } = useAuth();
   const { latestSessionId, setIsWaitingForResponse, setLatestSessionId, setChatContent } = useChat();
 
@@ -27,6 +27,7 @@ export const useHandleMessageSend = (message: string, setMessage: React.Dispatch
   const submit = async () => {
     if (message.trim() === "") return;
     const token = localStorage.getItem("idToken") || "";
+    const projectId = localStorage.getItem("projectId") || "";
     setIsWaitingForResponse(true);
     setChatContent((prev: any) => [
       ...prev,
@@ -40,6 +41,7 @@ export const useHandleMessageSend = (message: string, setMessage: React.Dispatch
     ]);
 
     try {
+      setMessage("");
       const { data } = await generateQueryAnswer({
         variables: {
           message,

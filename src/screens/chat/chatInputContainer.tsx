@@ -8,10 +8,10 @@ import { AddFilesDialog } from "../myRequests/uploadFiles";
 // import { useChat } from "@/store/chatStore";
 
 export const ChatInputContainer: React.FC = () => {
-  const projectId = localStorage.getItem("projectId") || "";
+  // const projectId = localStorage.getItem("projectId") || "";
   const [message, setMessage] = useState("");
   const [showAddFileModal, setShowAddFileModal] = useState(false);
-  const handleSend = useHandleMessageSend(message, setMessage, projectId);
+  const handleSend = useHandleMessageSend(message, setMessage);
   //   const { latestSessionId, setIsWaitingForResponse, setLatestSessionId, setChatContent } = useChat();
 
   //   const handleSend = () => {
