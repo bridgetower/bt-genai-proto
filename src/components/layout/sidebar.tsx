@@ -5,6 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 
 import { FETCH_PROJECT_DDL_LIST } from "@/apollo/schemas/projectSchemas";
 import { useAuth } from "@/providers/CoginitoAuthProvider";
+import { useProjectId } from "@/store/projectIdStore";
 
 import { Logo } from "../common/logo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -16,7 +17,7 @@ export const Sidebar: React.FC = () => {
   const { logout, usersession } = useAuth(); // Assuming `user` contains name, email, and avatar.
   const location = useLocation();
   // const naivgate = useNavigate();
-  const [projectId, setProjectId] = useState<string>(localStorage.getItem("projectId") || "");
+  const { projectId, setProjectId } = useProjectId();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { data: projectListData } = useQuery(FETCH_PROJECT_DDL_LIST, {
@@ -53,7 +54,6 @@ export const Sidebar: React.FC = () => {
   const activeItem = getActiveItem();
 
   const handleProjectChange = (value: string) => {
-    localStorage.setItem("projectId", projectId);
     setProjectId(value);
     // naivgate("/chat");
   };
@@ -97,7 +97,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Footer */}
       <div className="p-6">
-        <Select onValueChange={handleProjectChange} defaultValue={projectId}>
+        <Select onValueChange={handleProjectChange} defaultValue={projectId || ""}>
           <SelectTrigger className="w-full border-none rounded-lg bg-gray-800 text-white hover:text-yellow-400 ring-offset-transparent focus:ring-0 focus:ring-offset-0">
             <div className="flex items-center gap-1 ">
               <LibraryBig size={16} /> <SelectValue placeholder="Select a project" />

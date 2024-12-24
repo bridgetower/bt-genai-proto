@@ -5,6 +5,7 @@ import { PublicLayout } from "./components/layout";
 import { ProtectedLoyout } from "./components/layout/ProtectedLayout";
 import { ChatProvider } from "./providers/chatProvider";
 import { AuthProvider } from "./providers/CoginitoAuthProvider";
+import { ProjectIdProvider } from "./providers/projectIdProvider";
 import { ChatPage } from "./screens/chat";
 import { LandingPage } from "./screens/landing/LandingPage";
 import LoginPage from "./screens/login/Login";
@@ -19,7 +20,11 @@ const AppRouters: React.FC = () => {
       children: [
         {
           path: "/",
-          element: <ProtectedLoyout />,
+          element: (
+            <ProjectIdProvider>
+              <ProtectedLoyout />
+            </ProjectIdProvider>
+          ),
           errorElement: <PageNotFound />,
           children: [
             {

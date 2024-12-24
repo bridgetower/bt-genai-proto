@@ -8,14 +8,15 @@ import { FETCH_PROJECT_DDL_LIST } from "@/apollo/schemas/projectSchemas";
 import { Loader } from "@/components/loader/Loader";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useProjectId } from "@/store/projectIdStore";
 
 const LandingPage: React.FC = () => {
   const token = localStorage.getItem("idToken");
   const navigate = useNavigate();
-  const [projectId, setProjectId] = useState<string>("");
   const [projectList, setProjectList] = useState([]);
   const [getStartedClicked, setGetStartedClicked] = useState(false);
 
+  const { projectId, setProjectId } = useProjectId();
   const { data: projectListData, loading } = useQuery(FETCH_PROJECT_DDL_LIST, {
     variables: {
       pageNo: 1,
@@ -73,7 +74,7 @@ const LandingPage: React.FC = () => {
 
           {/* Dropdown Menu */}
           <div className="mt-6 flex items-center justify-center gap-2">
-            <Select onValueChange={handleSelectChange} defaultValue={projectId}>
+            <Select onValueChange={handleSelectChange} defaultValue={projectId || ""}>
               <SelectTrigger
                 className={`w-52 text-gray-600 ring-offset-transparent focus:ring-0 focus:ring-offset-0 border-2 ${!projectId && getStartedClicked && "text-red-500 border-red-500"}`}
               >
