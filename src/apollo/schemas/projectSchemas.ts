@@ -168,3 +168,60 @@ export const PROJECT_UPDATE_SUBSCRIPTION = gql`
     }
   }
 `;
+export const FETCH_STAGE_BY_REFID = gql`
+  query MyQuery($refId: String!) {
+    GetStepsByRefId(input: { refId: $refId }) {
+      data {
+        reference {
+          createdat
+          datasourceid
+          depth
+          id
+          ingested
+          ingestionjobid
+          name
+          projectid
+          referencestage
+          reftype
+          size
+          status
+          url
+        }
+        stages {
+          createdat
+          description
+          id
+          isactive
+          isdeleted
+          name
+          stagesequence
+          stagetypeid
+          status
+          steps {
+            createdat
+            description
+            id
+            isactive
+            isdeleted
+            name
+            stageid
+            status
+            stepdetails {
+              createdat
+              id
+              isactive
+              isdeleted
+              metadata
+              refid
+              status
+              stepid
+            }
+            stepsequence
+          }
+        }
+      }
+      error
+      status
+    }
+  }
+`;

@@ -2,10 +2,10 @@ import { useLazyQuery } from "@apollo/client";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-import { FETCH_PROJECT_BY_ID } from "@/apollo/schemas/projectSchemas";
+import { FETCH_STAGE_BY_REFID } from "@/apollo/schemas/projectSchemas";
 import { SidepanelSkeleton } from "@/components/common/SidepanelSkeleton";
 import { ISteperData, Stepper } from "@/components/common/Stepper";
-import { IProjectAttributes, ProjectStageEnum, ProjectStageLabel, stepData } from "@/types/ProjectData";
+import { IProjectAttributes, stepData } from "@/types/ProjectData";
 
 let tempStepsData: ISteperData[] = [];
 const ProjectDetails: React.FC<{ id: string }> = (props) => {
@@ -16,16 +16,15 @@ const ProjectDetails: React.FC<{ id: string }> = (props) => {
   const [project, setProject] = useState<IProjectAttributes | null>(null);
   const memoizedStepperData = React.useMemo(() => stepperData, [stepperData]);
   const [docPage, setDocPage] = useState(1);
-  const [getData, { loading, error, refetch, fetchMore }] = useLazyQuery(FETCH_PROJECT_BY_ID, {
+  const [getData, { loading, error, refetch, fetchMore }] = useLazyQuery(FETCH_STAGE_BY_REFID, {
     variables: {
-      id,
-      docPage,
-      rowLimit
+      refId: id
     },
     context: {
       headers: {
         identity: localStorage.getItem("idToken")
-      }
+      },
+      apiVersion: "admin"
     },
     fetchPolicy: "cache-and-network"
   });
@@ -46,32 +45,29 @@ const ProjectDetails: React.FC<{ id: string }> = (props) => {
 
   const getProjectDetailsById = () => {
     // showLoader();
+    setStepperData([]);
     getData({
-      variables: { projectId: id, pageNo: docPage, limit: rowLimit }
+      variables: { refId: id }
+      // context: {
+      //   apiVersion: "admin"
+      // }
     })
       .then((res: any) => {
-        if (res.data?.GetProjectAndStepById?.data) {
-          setProject(res.data.GetProjectAndStepById.data?.project);
-          const lastCompletedStage = res.data.GetProjectAndStepById.data?.project?.projectstage;
-          let stepCompleted = true;
-          tempStepsData = tempStepsData.map((step) => {
-            const stage = res.data?.GetProjectAndStepById?.data?.stagedata?.stages;
-            const data: any[] = stage?.filter((s: any) => s.name === step.label) || [];
-            const finalData = {
-              ...step,
-              data: step.data ? step.data : data.length ? data[0] : null,
-              completed: stepCompleted,
-              dataLoading: false
-            };
-            if (step.label === ProjectStageLabel[lastCompletedStage as ProjectStageEnum]) {
-              stepCompleted = false;
-            }
-            return finalData;
-          });
-          setStepperData(tempStepsData);
+        if (res.data?.GetStepsByRefId?.data) {
+          // setProject(res.data.GetProjectAndStepById.data?.project);
+          // const lastCompletedStage = res.data.GetProjectAndStepById.data?.project?.projectstage;
+          // let stepCompleted = true;
+          const data = (res.data?.GetStepsByRefId?.data?.stages || []).map((stage: ISteperData, i: number) => ({
+            data: stage,
+            completed: stage.status === "COMPLETED",
+            label: stage.name,
+            isExpanded: i === 0
+            //     dataLoading: false
+          }));
+          setStepperData(data);
         } else {
           setProject(null);
-          toast.error(res?.data?.GetProjectAndStepById?.error);
+          toast.error(res?.data?.GetStepsByRefId?.error);
         }
       })
       .catch((error: any) => {
@@ -87,7 +83,7 @@ const ProjectDetails: React.FC<{ id: string }> = (props) => {
     if (stepData[index].data) {
       return;
     }
-    setDocPage(index + 1);
+    // setDocPage(index + 1);
   };
 
   return (
@@ -105,7 +101,7 @@ const ProjectDetails: React.FC<{ id: string }> = (props) => {
           />
         </>
       )}
-      {!project && !loading && <div className="text-center text-red-500">No data found</div>}
+      {!memoizedStepperData.length && !loading && <div className="text-center text-red-500">No data found</div>}
     </div>
   );
 };

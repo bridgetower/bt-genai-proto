@@ -2,7 +2,9 @@
 import { PaperclipIcon, Send } from "lucide-react";
 import React, { useState } from "react";
 
+import ErrorPopup from "@/components/errorAlert/ErrorPopup";
 import { useHandleMessageSend } from "@/hooks/useHandleMessageSend";
+import { useProjectId } from "@/store/projectIdStore";
 
 import { AddFilesDialog } from "../myRequests/uploadFiles";
 // import { useChat } from "@/store/chatStore";
@@ -12,6 +14,9 @@ export const ChatInputContainer: React.FC = () => {
   const [message, setMessage] = useState("");
   const [showAddFileModal, setShowAddFileModal] = useState(false);
   const handleSend = useHandleMessageSend(message, setMessage);
+  const { projectId } = useProjectId();
+  const [errorMsg, setErrorMsg] = useState<string>("");
+  const [showErrorAlert, setShowErrorAlert] = useState<boolean>(false);
   //   const { latestSessionId, setIsWaitingForResponse, setLatestSessionId, setChatContent } = useChat();
 
   //   const handleSend = () => {
@@ -48,12 +53,27 @@ export const ChatInputContainer: React.FC = () => {
   //       setMessage(""); // Clear the input after sending
   //     }
   //   };
+
+  const onMessageSendTrigger = () => {
+    if (!projectId) {
+      setErrorMsg("Please select project first and then send");
+      setShowErrorAlert(true);
+      return;
+    } else {
+      setErrorMsg("");
+      handleSend();
+    }
+  };
   const toggleAddFileModal = () => {
     setShowAddFileModal(!showAddFileModal);
+  };
+  const hideAlert = () => {
+    setShowErrorAlert(false);
   };
   return (
     <>
       {" "}
+      <ErrorPopup message={errorMsg} open={showErrorAlert} onClose={hideAlert} />
       <AddFilesDialog onAfterUpload={() => {}} isOpen={showAddFileModal} setIsOpen={setShowAddFileModal} />
       <div className="flex items-center p-3 mt-4 bg-primary-foreground border-t border-primary">
         <button className="text-primary hover:text-gray-700 p-2" onClick={() => toggleAddFileModal()}>
@@ -67,11 +87,13 @@ export const ChatInputContainer: React.FC = () => {
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => {
             if (e.code === "Enter") {
-              handleSend();
+              setTimeout(() => {
+                onMessageSendTrigger();
+              }, 300);
             }
           }}
         />
-        <button onClick={handleSend} className="bg-yellow-500 text-white p-2 rounded-full hover:bg-yellow-600 focus:outline-none">
+        <button onClick={onMessageSendTrigger} className="bg-yellow-500 text-white p-2 rounded-full hover:bg-yellow-600 focus:outline-none">
           <Send size={20} />
         </button>
       </div>
