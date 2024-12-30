@@ -65,7 +65,19 @@ export enum ProjectStatusEnum {
   CANCELLED = "CANCELLED",
   ACTIVE = "ACTIVE"
 }
-export type ActionStatus = "INITIATED" | "ACTIVE" | "ERROR" | "CANCELLED" | "COMPLETED" | "PENDING" | "APPROVED" | "REJECTED" | "UPLOADED";
+export type ActionStatus =
+  | "INITIATED"
+  | "ACTIVE"
+  | "ERROR"
+  | "ERRORED"
+  | "CANCELLED"
+  | "COMPLETED"
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED"
+  | "UPLOADED"
+  | "PUBLISHED"
+  | "PROCESSING";
 
 export const statusColor: Record<ActionStatus, { bg: string; text: string }> = {
   INITIATED: {
@@ -73,10 +85,14 @@ export const statusColor: Record<ActionStatus, { bg: string; text: string }> = {
     text: "text-blue-600" // Tailwind text color
   },
   ACTIVE: {
-    bg: "bg-purple-100",
-    text: "text-purple-600"
+    bg: "bg-green-100",
+    text: "text-green-600"
   },
   ERROR: {
+    bg: "bg-red-100",
+    text: "text-red-600"
+  },
+  ERRORED: {
     bg: "bg-red-100",
     text: "text-red-600"
   },
@@ -103,9 +119,16 @@ export const statusColor: Record<ActionStatus, { bg: string; text: string }> = {
   UPLOADED: {
     bg: "bg-yellow-100",
     text: "text-yellow-600"
+  },
+  PUBLISHED: {
+    bg: "bg-green-100",
+    text: "text-green-600"
+  },
+  PROCESSING: {
+    bg: "bg-sky-100",
+    text: "text-sky-600"
   }
 };
-
 export const ProjectStatusKeyValueArray: { key: string; value: string }[] = Object.entries(ProjectStatusEnum).map(([key, value]) => ({
   key: key.replace("_", " "),
   value

@@ -29,17 +29,19 @@ const DocumentSource: React.FC<{ content: string }> = ({ content }) => {
       return {
         file_name: parsed.file_name || "Unknown Document",
         project_id: parsed.project_id,
-        content: parsed
+        content: parsed,
+        refId: parsed.ref_id
       };
     } catch {
       return {
         file_name: "Unknown Document",
+        refId: "",
         content
       };
     }
   }, [content]);
 
-  return <ProjectDetails id={documentData.project_id || ""} />;
+  return <ProjectDetails id={documentData.refId || ""} />;
 };
 
 export const Sources: React.FC<SourceLinkProps> = ({ sourceArray, activeIndex }) => {
@@ -87,51 +89,54 @@ export const Sources: React.FC<SourceLinkProps> = ({ sourceArray, activeIndex })
       <h1 className="text-xl font-bold mb-4 text-primary">Sources</h1>
 
       <Accordion type="single" collapsible value={openItems} onValueChange={setOpenItems} className="space-y-2">
-        {sourceArray.map((source: SourceReference, index: number) => (
-          <AccordionItem
-            ref={index === activeIndex ? activeItemRef : undefined}
-            value={`source${index}`}
-            key={index}
-            className={`border rounded-lg transition-all duration-300 ${
-              index === activeIndex ? "border-gray-300 shadow-md bg-accent/10" : "border-border hover:border-gray-300"
-            }`}
-          >
-            <AccordionTrigger
-              className={`
+        {sourceArray.map((source: SourceReference, index: number) => {
+          const ref = JSON.parse(source.content);
+          return (
+            <AccordionItem
+              ref={index === activeIndex ? activeItemRef : undefined}
+              value={`source${index}`}
+              key={index}
+              className={`border rounded-lg transition-all duration-300 ${
+                index === activeIndex ? "border-gray-300 shadow-md bg-accent/10" : "border-border hover:border-gray-300"
+              }`}
+            >
+              <AccordionTrigger
+                className={`
                 text-[#1890FF] hover:no-underline px-4 transition-all duration-300
                 ${index === activeIndex ? "font-medium" : ""}
                 hover:bg-accent/50 rounded-t-lg
               `}
-            >
-              <span className="flex items-center gap-2">
-                {source.refType === "website" ? (
-                  <Globe
-                    size={16}
-                    className={`
+              >
+                <span className="flex items-center gap-2">
+                  {source.refType === "website" ? (
+                    <Globe
+                      size={16}
+                      className={`
                       transition-colors duration-300
                       ${index === activeIndex ? "text-primary" : "text-muted-foreground"}
                     `}
-                  />
-                ) : (
-                  <FileText
-                    size={16}
-                    className={`
+                    />
+                  ) : (
+                    <FileText
+                      size={16}
+                      className={`
                       transition-colors duration-300
                       ${index === activeIndex ? "text-primary" : "text-muted-foreground"}
                     `}
-                  />
-                )}
-                <span className="flex items-baseline gap-2 ">
-                  <span>Source {index + 1}</span>
-                  {/* {index === activeIndex && <span className="text-xs text-muted-foreground">(Active)</span>} */}
+                    />
+                  )}
+                  <span className="flex items-baseline gap-2 ">
+                    <span>{ref?.file_name}</span>
+                    {/* {index === activeIndex && <span className="text-xs text-muted-foreground">(Active)</span>} */}
+                  </span>
                 </span>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-3">
-              {source.refType === "website" ? <WebsiteSource content={source.content} /> : <DocumentSource content={source.content} />}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-3">
+                {source.refType === "website" ? <WebsiteSource content={source.content} /> : <DocumentSource content={source.content} />}
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
       </Accordion>
     </div>
   );

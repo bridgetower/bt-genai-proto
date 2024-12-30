@@ -1,14 +1,18 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, CheckCircle2, ChevronDown, ChevronRight, Copy, Globe, Link2, Loader, Loader2 } from "lucide-react";
+import { Check, CheckCircle2, ChevronDown, ChevronRight, Copy, Link2, Loader, Loader2, Paperclip } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
+import { ChainTypes } from "@/types/ChainTypes";
+import { getExplorerUrl } from "@/utils/blockchainExplorer";
 import { copyToClipboard } from "@/utils/copyToClipboard";
 import { timeAgo } from "@/utils/timeAgo";
 
+import { Badge } from "../ui/badge";
+
 export interface ISteperData {
   completed: boolean;
-
+  // icon: React.ReactNode;
   label: string;
   data: any;
   // sectionId: string;
@@ -18,6 +22,8 @@ export interface ISteperData {
   selected?: boolean;
   index?: number;
   dataLoading?: boolean;
+  status?: string;
+  name?: string;
 }
 
 interface StepperProps {
@@ -226,41 +232,29 @@ const StepMetadataDetails = ({ step }: { step: any }) => {
 
   const Stepdetails = () => {
     switch (step.name) {
-      // case "File upload from frontend":
-      // case "Upload to S3":
-      // case "Read file from s3":
-      // return (
-      //   <ul className="font-medium text-foreground">
-      //     {(step.stepdetails || []).map((d: any, i: number) => {
-      //       if (d.metadata === "null" || d.metadata === "undefind") {
-      //         return null;
-      //       }
-      //       const data = jsonParse(d.metadata);
-      //       return (
-      //         <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md">
-      //           <Paperclip className=" text-foreground" size={14} />
-      //           <a
-      //             className="underline text-xs"
-      //             href={data?.downloadUrl}
-      //             target="_blank"
-      //             rel="noreferrer"
-      //             // onClick={() =>
-      //             //   downloadBase64File(
-      //             //     (data?.fileContent || data?.content) as string,
-      //             //     data?.fileName,
-      //             //     data?.contentType,
-      //             //   )
-      //             // }
-      //           >
-      //             {data?.fileName}
-      //           </a>
-      //           {data?.size && <div className="text-xs">{data?.size}</div>}
-      //           <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
-      //         </li>
-      //       );
-      //     })}
-      //   </ul>
-      // );
+      case "File upload from frontend":
+      case "Upload to S3":
+      case "Read file from s3":
+        return (
+          <ul className="font-medium text-foreground">
+            {(step.stepdetails || []).map((d: any, i: number) => {
+              if (d.metadata === "null" || d.metadata === "undefind") {
+                return null;
+              }
+              const data = jsonParse(d.metadata);
+              return (
+                <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md">
+                  <Paperclip className=" text-foreground" size={14} />
+                  <a className="underline text-xs" href={data?.downloadUrl} target="_blank" rel="noreferrer">
+                    {data?.fileName}
+                  </a>
+                  {data?.size && <div className="text-xs">{data?.size}</div>}
+                  <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
+                </li>
+              );
+            })}
+          </ul>
+        );
 
       case "File hashing":
       case "Hashing of s3 file":
@@ -295,9 +289,18 @@ const StepMetadataDetails = ({ step }: { step: any }) => {
               const data = jsonParse(d.metadata);
               return (
                 <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md cursor-default">
-                  <Globe className=" text-foreground" size={14} />
+                  <img
+                    src={`/images/blockchainIcons/${data.chainType?.toLowerCase()}.png`}
+                    className="w-4 rounded-full text-foreground"
+                    alt={data.chainType}
+                  />
                   <div className="underline text-xs w-[300px] truncate">
-                    <a href={`https://testnet.snowtrace.io/tx/${data.txHash}`} target="_blank" rel="noreferrer">
+                    <a
+                      // href={`https://testnet.snowtrace.io/tx/${data.txHash}`}
+                      href={getExplorerUrl((data.chainType || "Avalanche") as ChainTypes, `tx/${data.txHash}`)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       {data.txHash}
                     </a>
                   </div>
@@ -308,28 +311,28 @@ const StepMetadataDetails = ({ step }: { step: any }) => {
             })}
           </ul>
         );
-      // case "Chunking":
-      //   return (
-      //     <ul className="font-medium text-foreground">
-      //       {(step.stepdetails || []).map((d: any, i: number) => {
-      //         if (d.metadata === "null" || d.metadata === "undefind") {
-      //           return null;
-      //         }
-      //         const data = jsonParse(d.metadata);
-      //         return (
-      //           <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md">
-      //             <Paperclip className=" text-foreground" size={14} />
-      //             <div>{data?.fileName}</div>
-      //             <div className="text-xs">Chunks</div>
-      //             <Badge variant={"success"} className="py-0 text-xs">
-      //               {data?.number_of_chunks}
-      //             </Badge>
-      //             <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
-      //           </li>
-      //         );
-      //       })}
-      //     </ul>
-      //   );
+      case "Chunking":
+        return (
+          <ul className="font-medium text-foreground">
+            {(step.stepdetails || []).map((d: any, i: number) => {
+              if (d.metadata === "null" || d.metadata === "undefind") {
+                return null;
+              }
+              const data = jsonParse(d.metadata);
+              return (
+                <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md">
+                  <Paperclip className=" text-foreground" size={14} />
+                  <div>{data?.fileName}</div>
+                  <div className="text-xs">Chunks</div>
+                  <Badge variant={"success"} className="py-0 text-xs">
+                    {data?.number_of_chunks}
+                  </Badge>
+                  <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
+                </li>
+              );
+            })}
+          </ul>
+        );
 
       case "Chunking hash":
         return (
@@ -356,32 +359,32 @@ const StepMetadataDetails = ({ step }: { step: any }) => {
           </ul>
         );
 
-      // case "Embedding of chunks":
-      //   return (
-      //     <ul className="font-medium text-foreground">
-      //       {(step.stepdetails || []).map((d: any, i: number) => {
-      //         if (d.metadata === "null" || d.metadata === "undefind") {
-      //           return null;
-      //         }
-      //         const data = jsonParse(d.metadata);
-      //         return (
-      //           <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md">
-      //             <Link2 className=" text-foreground" size={14} />
-      //             <div>{data?.fileName}</div>
-      //             <div className="text-xs">Chunks</div>
-      //             <Badge className="py-0 text-xs" variant={"success"}>
-      //               {data?.number_of_chunks}
-      //             </Badge>
-      //             <div className="text-xs">Vector dimensions</div>
-      //             <Badge className="py-0 text-xs" variant={"success"}>
-      //               {data?.vector_dimensions}
-      //             </Badge>
-      //             <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
-      //           </li>
-      //         );
-      //       })}
-      //     </ul>
-      //   );
+      case "Embedding of chunks":
+        return (
+          <ul className="font-medium text-foreground">
+            {(step.stepdetails || []).map((d: any, i: number) => {
+              if (d.metadata === "null" || d.metadata === "undefind") {
+                return null;
+              }
+              const data = jsonParse(d.metadata);
+              return (
+                <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md">
+                  <Link2 className=" text-foreground" size={14} />
+                  <div>{data?.fileName}</div>
+                  <div className="text-xs">Chunks</div>
+                  <Badge className="py-0 text-xs" variant={"success"}>
+                    {data?.number_of_chunks}
+                  </Badge>
+                  <div className="text-xs">Vector dimensions</div>
+                  <Badge className="py-0 text-xs" variant={"success"}>
+                    {data?.vector_dimensions}
+                  </Badge>
+                  <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
+                </li>
+              );
+            })}
+          </ul>
+        );
 
       case "Hashing of reconstructive data":
         return (
@@ -396,7 +399,7 @@ const StepMetadataDetails = ({ step }: { step: any }) => {
                   <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md cursor-default">
                     <Link2 className=" text-foreground" size={14} />
                     <div className="underline text-xs">{data?.file_name}</div>
-                    <div className="underline text-xs w-[300px] truncate">{data?.file_content_hash}</div>
+                    <div className="underline text-xs w-[300px] truncate">{data?.hash}</div>
                     <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
                     <Copy className="cursor-pointer" size={14} onClick={() => oncopy(data?.file_content_hash || "")} />
                   </li>
@@ -406,48 +409,46 @@ const StepMetadataDetails = ({ step }: { step: any }) => {
           </ul>
         );
 
-      // case "Reconstruction of data":
-      //   return (
-      //     <ul className="font-medium text-foreground">
-      //       {(step.stepdetails || []).map((d: any, i: number) => {
-      //         if (d.metadata === "null" || d.metadata === "undefind") {
-      //           return null;
-      //         }
-      //         const data = jsonParse(d.metadata);
-      //         return (
-      //           <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md">
-      //             <Paperclip className=" text-foreground" size={14} />
-      //             <div className="underline text-xs">{data?.file_name}</div>
-      //             <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
-      //           </li>
-      //         );
-      //       })}
-      //     </ul>
-      //   );
-
-      // case "Writing to open search":
-      //   return (
-      //     <ul className="font-medium text-foreground">
-      //       {(step.stepdetails || []).map((d: any, i: number) => {
-      //         if (d.metadata === "null" || d.metadata === "undefind") {
-      //           return null;
-      //         }
-      //         const data = jsonParse(d.metadata);
-      //         return (
-      //           <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md">
-      //             <Link2 className=" text-foreground" size={14} />
-      //             <div>{data?.fileName}</div>
-      //             <div className="text-xs">Vector Database</div>
-      //             <Badge variant={"success"} className="py-0 text-xs">
-      //               {data?.vector_database}
-      //             </Badge>
-      //             <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
-      //           </li>
-      //         );
-      //       })}
-      //     </ul>
-      //   );
-
+      case "Reconstruction of data":
+        return (
+          <ul className="font-medium text-foreground">
+            {(step.stepdetails || []).map((d: any, i: number) => {
+              if (d.metadata === "null" || d.metadata === "undefind") {
+                return null;
+              }
+              const data = jsonParse(d.metadata);
+              return (
+                <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md">
+                  <Paperclip className=" text-foreground" size={14} />
+                  <div className="underline text-xs">{data?.file_name}</div>
+                  <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
+                </li>
+              );
+            })}
+          </ul>
+        );
+      case "Writing to open search":
+        return (
+          <ul className="font-medium text-foreground">
+            {(step.stepdetails || []).map((d: any, i: number) => {
+              if (d.metadata === "null" || d.metadata === "undefind") {
+                return null;
+              }
+              const data = jsonParse(d.metadata);
+              return (
+                <li key={i} className="w-full flex gap-1 item-center bg-background mb-1 px-2 py-1 rounded-md">
+                  <Paperclip className=" text-foreground" size={14} />
+                  <div>{data?.filename && data.filename + " - "}</div>
+                  <div className="text-xs"> Vector Database</div>
+                  <Badge variant={"success"} className="py-0 text-xs">
+                    {data?.vector_database}
+                  </Badge>
+                  <CheckCircle2 className="text-green-500" size={16} fill="#52C41A" stroke="white" />
+                </li>
+              );
+            })}
+          </ul>
+        );
       default:
         return null;
     }
